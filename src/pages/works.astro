@@ -1,0 +1,35 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Works | 〇〇のホームページ">
+	<h1>制作物</h1>
+
+	<ul>
+		<li>
+			<strong>このホームページ</strong> — Astroで作りました
+		</li>
+		<li>
+			<strong>〇〇</strong> — 授業で作った〇〇です
+		</li>
+	</ul>
+
+	<h2>デモ動画</h2>
+	<div class="video-wrapper">
+		<iframe
+			src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+			title="デモ動画"
+			allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+			allowfullscreen
+		></iframe>
+	</div>
+</Layout>
+
+<style>
+	.video-wrapper iframe {
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		border-radius: 8px;
+		border: none;
+	}
+</style>
