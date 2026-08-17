@@ -6,10 +6,33 @@ import Board from '../components/Board.astro';
 ---
 
 <Layout title="About | しーのホームページ">
+    <h1>自己紹介</h1>
     <img src="/images/icon.jpg" alt="プロフィール写真" class="profile-img" />
-	<h1>自己紹介</h1>
+    <small>これは好きな曲のイメージキャラクターのアイコン</small>
 	<p>電気通信大学の1年生です。最近はダーツにハマっています。</p>
 
+
+<div class="profile">
+    <small>
+        Name<br>
+        しー
+        <hr>
+        Belonging<br>
+        軽音楽部/器楽部/シンセデザイン研究部<br>
+        <hr>
+        Birthday<br>
+        2007/06/20<br>
+        <hr>
+        Hobby<br>
+        ダーツ/ドラム/ゲーム<br>
+        <hr>
+        Games<br>
+        Overwatch/Slay the spire 2/Shadowverse/
+    </small>
+</div>
+
+
+<small>スタッツ</small>
 <StatCard label="RATING" value={darts.rating} note={darts.flight}/>
 <StatCard label="01 GAMES" value={darts.stats01} />
 <StatCard label="CRICKET" value={darts.cricket} />
@@ -30,11 +53,10 @@ import Board from '../components/Board.astro';
 
 <style>
     .profile-img {
-        width: 120px;
-		height: 120px;
+        width: 70px;
+		height: 70px;
 		border-radius: 50%;
 		object-fit: cover;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .social-links {
@@ -43,11 +65,17 @@ import Board from '../components/Board.astro';
     margin-top: 1rem;
 }
 
+.profile {
+
+}
+
+/* 本のテンプレートの青（#4a90d9）が残っていたので、アクセント変数へ。
+   ここを直書きにしておくと、配色を切り替えても取り残されます */
 .social-links a {
     padding: 0.4rem 1rem;
-    border: 1px solid #4a90d9;
-    border-radius: 999px;
-    color: #4a90d9;
+    border: 1px solid var(--accent);
+    border-radius: 0px;
+    color: var(--accent);
     text-decoration: none;
     font-size: 0.9rem;
     transition:
@@ -56,8 +84,8 @@ import Board from '../components/Board.astro';
 }
 
 .social-links a:hover {
-    background-color: #4a90d9;
-    color: #fff;
+    background-color: var(--accent);
+    color: var(--bg);
 }
 </style>
 

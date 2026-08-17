@@ -8,5 +8,30 @@ const { label, value, note } = Astro.props;
 </div>
 
 <style>
-    .statcard { border: 1px solid #ddd; padding: 1rem; }
+    .statcard {
+        border: 1px solid var(--line);   /* #ddd 直書きをやめて変数へ */
+        padding: 1rem;
+    }
+    /* ラベルは小さく、数字は大きく。
+       この差が「対比」で、しゃれて見えるかどうかの分かれ目になります */
+    .statcard h3 {
+        font-family: var(--font-jp);     /* ラベルは本文書体のまま */
+        font-size: 0.75rem;
+        letter-spacing: 0.16em;
+        color: var(--muted);
+        font-weight: 400;
+        margin-bottom: 0.2rem;
+    }
+    /* ★数字はこのサイトの主役★ 見出し書体（明朝）に乗せる */
+    .statcard p {
+        font-family: var(--font-display);
+        font-size: 2.4rem;
+        line-height: 1.1;
+        color: var(--text);
+    }
+    .statcard small {
+        font-size: 0.9rem;
+        color: var(--muted);
+        margin-left: 0.2em;
+    }
 </style>

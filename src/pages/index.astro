@@ -6,8 +6,9 @@ import Countdown from '../components/Countdown.astro';
 ---
 
 <Layout title="しーのホームページ">
-	<h1>こんにちは、しーです</h1>
-	<p>電気通信大学の学生です。ここは私のホームページです。</p>
+	<img src="/images/icon.jpg" alt="プロフィール写真" class="profile-img" /> 
+	<h1>しー</h1>
+	<p>電気通信大学情報理工学域Ⅰ類</p>
 
 	<Countdown label="軽音夏合宿まで" deadline="2026-09-04" />
 	<Countdown label="調布祭まで" deadline="2026-11-20" />
@@ -16,6 +17,18 @@ import Countdown from '../components/Countdown.astro';
   {posts.map((post) => (
     <li>{post.src} - {post.date} — {post.text}</li>
   ))}
+
+  <br>
+  ここに相互リンク
 </ul>
 
 </Layout>
+
+<style>
+	.profile-img {
+		width: 120px;
+		height: 120px;
+		border-radius: 50%;
+		object-fit: cover;
+	}
+</style>

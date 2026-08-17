@@ -1,17 +1,53 @@
-:root {
-  --ink:    #141110;  /* 背景。茶色寄りの黒でバーみたいな雰囲気(笑) にしたい*/
-  --panel:  #1C1817;  /* 少し浮かせたい面 */
-  --line:   #2E2724;  /* 罫線 */
-  --chalk:  #ECE4D8;  /* 文字の色 */
-  --muted:  #8C817A;  /* 補助テキスト */
-  --amber:  #EE76B3;  /* アクセント */
-  --red:    #B23A2F;  /* ダーツボードの赤 */
-  --green:  #5FA86B;  /* ダーツボードの緑 */
+/* ============================================================
+   サイト全体で共有する設定。
+   ここの値を書き換えると、全ページ・全コンポーネントが追随します。
+   ============================================================ */
 
-  --font-display: 'Oswald', 'Arial Narrow', sans-serif;
+:root {
+  /* --- 配色：案3 濃い青 --------------------------------------
+     他の案を試すときは、この8行の「値」だけ差し替えてください。
+     名前は変えないこと（各ファイルがこの名前を参照しています）。 */
+  --bg:     #FAFAFB;   /* 背景。冷たい白 */
+  --panel:  #F0F1F4;   /* 少し沈んだ面 */
+  --line:   #DBDDE3;   /* 罫線 */
+  --text:   #17181C;   /* 文字。真っ黒を避けている */
+  --muted:  #73757D;   /* 補助テキスト */
+  --accent: #2B4C9B;   /* アクセント＝濃い青 */
+
+  --red:    #C4453A;   /* ダーツ盤の赤（盤専用） */
+  --green:  #4F9E63;   /* ダーツ盤の緑（盤専用） */
+
+  /* --- 書体：案C モダンな幾何学（適用中）----------------------
+     読みやすさ優先。見出しと数字は Space Grotesk、日本語は Zen Kaku Gothic New。
+
+     ★2つ並べているのがミソ★
+     Space Grotesk は欧文だけの書体で、日本語の字を持っていません。
+     持っていない文字は自動で次の候補が描くので、この1行だけで
+     「数字と英字は Space Grotesk、日本語はゴシック」が実現します。
+     字ごとのフォールバックと呼ばれるやり方です。
+
+     控え：他の案に戻すときは下と入れ替え
+     案A 明朝    --font-display: 'Zen Old Mincho', serif;
+                 --font-jp: 'Zen Kaku Gothic New', 'Hiragino Sans', sans-serif;
+     案B 丸ゴシ  --font-display: 'Outfit', 'Zen Maru Gothic', sans-serif;
+                 --font-jp: 'Zen Maru Gothic', 'Hiragino Maru Gothic ProN', sans-serif;  */
+  --font-display: 'Space Grotesk', 'Zen Kaku Gothic New', sans-serif;
   --font-jp: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', sans-serif;
-  --max: 1080px;      /* 見出しの柱＋中身、全体の幅の上限 */
-  --measure: 780px;   /* 読み物の幅の上限。ここを揃えると右端が一直線に並ぶ */
+
+  /* --- 幅 ---------------------------------------------------- */
+  --max: 1080px;      /* 全体の幅の上限 */
+  --measure: 780px;   /* 読み物の幅の上限 */
+}
+
+/* --- 全ページ共通のタイポグラフィ ----------------------------
+   ★ここに書く理由★
+   Layout.astro の <style> は「Layoutが書いた要素」にしか効きません。
+   <h1> は各ページ側が書いているので、Layoutからは指定できないのです。
+   全ページに効かせたいものは、この global.css に置きます。 */
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 500;          /* 読みやすさ優先なので、太すぎず細すぎない中間 */
+  line-height: 1.4;
 }
 
 ul, ol { list-style: none; }
