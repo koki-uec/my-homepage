@@ -1,0 +1,17 @@
+:root {
+  --ink:    #141110;  /* 背景。茶色寄りの黒でバーみたいな雰囲気(笑) にしたい*/
+  --panel:  #1C1817;  /* 少し浮かせたい面 */
+  --line:   #2E2724;  /* 罫線 */
+  --chalk:  #ECE4D8;  /* 文字の色 */
+  --muted:  #8C817A;  /* 補助テキスト */
+  --amber:  #EE76B3;  /* アクセント */
+  --red:    #B23A2F;  /* ダーツボードの赤 */
+  --green:  #5FA86B;  /* ダーツボードの緑 */
+
+  --font-display: 'Oswald', 'Arial Narrow', sans-serif;
+  --font-jp: 'Zen Kaku Gothic New', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  --max: 1080px;      /* 見出しの柱＋中身、全体の幅の上限 */
+  --measure: 780px;   /* 読み物の幅の上限。ここを揃えると右端が一直線に並ぶ */
+}
+
+ul, ol { list-style: none; }

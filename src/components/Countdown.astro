@@ -1,0 +1,26 @@
+---
+const { label, deadline } = Astro.props;
+---
+
+<div class="chip">
+    <span>{label}</span>
+    <span data-deadline={deadline}>-</span>
+</div>
+
+<script>
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  document.querySelectorAll<HTMLElement>('[data-deadline]').forEach(el => {
+    const raw = el.dataset.deadline;
+    if (!raw) return;
+
+    const [y, m, d] = raw.split('-').map(Number);
+    const target = new Date(y, m - 1, d);
+
+    const diffMs = target.getTime() - today.getTime();
+    const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    el.textContent = days > 0 ? days + ' days' : 'done';
+  });
+</script>

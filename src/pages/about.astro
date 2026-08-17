@@ -1,11 +1,31 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import Layout from '../layouts/Layout.astro'; 
+import StatCard from '../components/StatCard.astro';
+import darts from '../data/darts.json';
+import Board from '../components/Board.astro';
 ---
 
-<Layout title="About | 〇〇のホームページ">
+<Layout title="About | しーのホームページ">
     <img src="/images/icon.jpg" alt="プロフィール写真" class="profile-img" />
 	<h1>自己紹介</h1>
 	<p>電気通信大学の1年生です。最近はダーツにハマっています。</p>
+
+<StatCard label="RATING" value={darts.rating} note={darts.flight}/>
+<StatCard label="01 GAMES" value={darts.stats01} />
+<StatCard label="CRICKET" value={darts.cricket} />
+
+<Board />
+
+<div class="social-links" slot="outside">
+    <a href="https://x.com/c_chaaan" target="_blank" rel="noopener noreferrer">
+        Twitter (X)
+    </a>
+
+    <a href="https://youtube.com/hikakintv" target="_blank" rel="noopener noreferrer">
+		Youtube
+	</a>
+</div>
+
 </Layout>
 
 <style>
@@ -41,13 +61,4 @@ import Layout from '../layouts/Layout.astro';
 }
 </style>
 
-<div class="social-links">
-    <a href="https://x.com/c_chaaan" target="_blank" rel="noopener noreferer">
-        Twitter (X)
-    </a>
-
-    <a href="https://youtube.com/hikakintv" target="_blank" rel="noopener noreferrer">
-		Youtube
-	</a>
-</div>
 

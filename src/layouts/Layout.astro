@@ -1,5 +1,6 @@
 ---
 const { title } = Astro.props;
+import '../styles/global.css';
 ---
 
 <html lang="ja">
@@ -13,6 +14,7 @@ const { title } = Astro.props;
 			href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700&display=swap"
 			rel="stylesheet"
 		/>
+		<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
 	</head>
 	<body>
 		<header>
@@ -27,6 +29,9 @@ const { title } = Astro.props;
 			<slot />
 		</main>
 
+		<slot name="outside" /> 
+		<!-- outsideのslotとして指定したらmain以下footer以上の部分に出るようにしてるよん -->
+
 		<footer>© 2026 </footer>
 	</body>
 </html>
@@ -38,29 +43,29 @@ const { title } = Astro.props;
 		padding: 2rem 1.5rem;
 		font-family: "Zen Kaku Gothic New", sans-serif;
 		line-height: 1.8;
-		color: #333;
-		background-color: #f4f6f8;
+		color: var(--chalk);
+		background-color: var(--ink);
 	}
 
 	nav {
 		display: flex;
 		gap: 1.5rem;
 		padding-bottom: 1rem;
-		border-bottom: 1px solid #ddd;
+		border-bottom: 1px solid var(--line);
 	}
 
 	nav a {
-		color: #4a90d9;
+		color: var(--muted);
 		text-decoration: none;
 		transition: color 0.2s ease;
 	}
 
 	nav a:hover {
-		color: #2f6bb3;
+		color: var(--amber);
 	}
 
 	main {
-		background-color: #fff;
+		background-color: var(--panel);
 		border-radius: 12px;
 		box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
 		padding: 2rem;
@@ -71,6 +76,6 @@ const { title } = Astro.props;
 		margin-top: 2rem;
 		padding-top: 1rem;
 		font-size: 0.85rem;
-		color: #888;
+		color: var(--muted);
 	}
 </style>
