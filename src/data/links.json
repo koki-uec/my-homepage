@@ -1,11 +1,5 @@
 [
   {
-    "name": "トラマト",
-    "url": "https://toramutton.me/",
-    "note": "Astroの記事ありがとナス！",
-    "icon": "/images/toramutton_icon.jpg"
-  },
-  {
     "name": "しおり🔖",
     "url": "https://shiori-02-14.github.io/Homepage/index.html",
     "note": "アプリ開発も記事もすげえ",
@@ -16,11 +10,5 @@
     "url": "https://amigo-homepage.vercel.app/",
     "note": "絵柄かわいすぎるぞ😠",
     "icon": "/images/amigo_icon.jpg"
-  },
-  {
-    "name": "かき",
-    "url": "https://my-homepage-one-murex.vercel.app/",
-    "note": "教職erガチ尊敬",
-    "icon": "/images/kaki_icon.jpg"
   }
 ]
