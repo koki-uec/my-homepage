@@ -1,0 +1,38 @@
+---
+const { label, value, max = 5 } = Astro.props;
+
+// 点いている星と消えている星の数を先に決めておく
+const on = Math.max(0, Math.min(max, Number(value) || 0));
+const off = max - on;
+---
+
+<div class="rating">
+    <span class="rating__label">{label}</span>
+    <span class="rating__stars" aria-label={`${on} / ${max}`}>
+        <span class="rating__on">{'★'.repeat(on)}</span><span class="rating__off">{'★'.repeat(off)}</span>
+    </span>
+</div>
+
+<style>
+    .rating {
+        display: flex;
+        align-items: baseline;
+        gap: 0.7rem;
+        font-size: 0.8rem;
+    }
+
+    /* 項目名の幅を固定 → 星の左端が全行で揃う。
+       プロフィール表やLOGでやったのと同じ手です */
+    .rating__label {
+        width: 6em;
+        flex-shrink: 0;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+    }
+
+    /* ☆ではなく★の色違いにしています。
+       ☆は書体によって形も幅も変わるので、並べたときにガタつきます */
+    .rating__stars { letter-spacing: 0.12em; }
+    .rating__on { color: var(--accent); }
+    .rating__off { color: var(--line); }
+</style>

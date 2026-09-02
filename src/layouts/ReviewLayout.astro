@@ -1,0 +1,88 @@
+---
+import Layout from './Layout.astro';
+import Rating from '../components/Rating.astro';
+
+// Markdownファイルの「---」で囲んだ部分が、ここに frontmatter として届きます
+const { frontmatter } = Astro.props;
+
+// courses を書いていない記事でも落ちないように、無ければ空の配列にしておく
+const courses = frontmatter.courses ?? [];
+---
+
+<Layout title={`${frontmatter.title} | しーのホームページ`}>
+
+    <p class="review__back"><a href="/reviews">← Reviews</a></p>
+
+    <h1>{frontmatter.title}</h1>
+    {frontmatter.summary && <p class="review__summary">{frontmatter.summary}</p>}
+
+    <!-- Markdown本文（導入や全体の感想）はここに入ります -->
+    <div class="review__body">
+        <slot />
+    </div>
+
+    <!-- 授業ごとの評価。frontmatter の courses を順に出します -->
+    {courses.map((c) => (
+        <section class="course">
+            <h2>{c.name}</h2>
+            {c.teacher && <p class="course__teacher">{c.teacher}</p>}
+
+            <div class="course__ratings">
+                <Rating label="楽単度" value={c.easy} />
+                <Rating label="面白さ" value={c.fun} />
+                <Rating label="ためになった" value={c.useful} />
+            </div>
+
+            {c.text && <p class="course__text">{c.text}</p>}
+        </section>
+    ))}
+
+</Layout>
+
+<style>
+    .review__back { margin: 0 0 1.2rem; font-size: 0.75rem; }
+    .review__back a {
+        color: var(--muted);
+        text-decoration: none;
+        letter-spacing: 0.08em;
+    }
+    .review__back a:hover { color: var(--accent); }
+
+    .review__summary {
+        margin: 0.3rem 0 1.6rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+    }
+
+    /* --- 授業ひとつぶん --- */
+    .course {
+        border-top: 1px solid var(--line);
+        padding-top: 1rem;
+        margin-bottom: 1.8rem;
+    }
+
+    .course h2 {
+        font-size: 1rem;
+        margin: 0 0 0.15rem;
+    }
+
+    .course__teacher {
+        margin: 0 0 0.7rem;
+        font-size: 0.75rem;
+        color: var(--muted);
+    }
+
+    .course__ratings { display: grid; gap: 0.35rem; margin-bottom: 0.7rem; }
+
+    .course__text { margin: 0; font-size: 0.9rem; }
+
+    /* Markdownから出てくる見出しや段落の間隔。
+       :global を付けているのは、Markdownが生成した要素には
+       このファイルのスコープ印が付かないためです */
+    .review__body :global(h2) { font-size: 1.05rem; margin: 1.8rem 0 0.5rem; }
+    .review__body :global(h3) { font-size: 0.95rem; margin: 1.3rem 0 0.4rem; }
+    .review__body :global(p) { margin: 0 0 1rem; font-size: 0.9rem; }
+    .review__body :global(ul) { margin: 0 0 1rem; padding-left: 1.2rem; }
+    .review__body :global(li) { list-style: disc; font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .review__body :global(a) { color: var(--accent); }
+</style>

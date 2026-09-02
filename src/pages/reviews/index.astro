@@ -1,0 +1,76 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+type Review = {
+    url?: string;
+    frontmatter: {
+        title: string;
+        summary?: string;
+        date?: string;
+    };
+};
+
+// ★このフォルダの .md を全部集める★
+// 記事ファイルを置くだけで一覧に載ります。ここを書き換える必要はありません。
+const modules = import.meta.glob<Review>('./*.md', { eager: true });
+
+const reviews = Object.entries(modules)
+    // ★「_」で始まるファイル（ひな形）を除く★
+    //   Astroは _ 始まりをページにしませんが、glob は読み込んでしまいます。
+    //   除かないと、開けないURLへのリンクが一覧に出ます。
+    .filter(([path]) => !path.includes('/_'))
+    .map(([, mod]) => mod)
+    // 新しい順に並べる
+    .sort((a, b) => ((a.frontmatter.date ?? '') < (b.frontmatter.date ?? '') ? 1 : -1));
+---
+
+<Layout title="Reviews | しーのホームページ">
+
+    <h1>Reviews</h1>
+    <p class="lead">uec_reviewなど順次更新予定。</p>
+
+    {reviews.length > 0 ? (
+        <ul class="reviewlist">
+            {reviews.map((r) => (
+                <li>
+                    <a href={r.url}>
+                        <b>{r.frontmatter.title}</b>
+                        {r.frontmatter.summary && <small>{r.frontmatter.summary}</small>}
+                    </a>
+                </li>
+            ))}
+        </ul>
+    ) : (
+        <p class="empty">まだ記事がありません。</p>
+    )}
+
+</Layout>
+
+<style>
+    .lead { font-size: 0.85rem; color: var(--muted); margin: 0 0 1.6rem; }
+
+    .reviewlist { border-top: 1px solid var(--line); }
+
+    .reviewlist a {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        padding: 0.9rem 0;
+        border-bottom: 1px solid var(--line);
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    .reviewlist a:hover { color: var(--accent); }
+
+    .reviewlist b { font-weight: 500; font-size: 1rem; }
+    .reviewlist small { font-size: 0.75rem; color: var(--muted); }
+
+    .empty {
+        border: 1px dashed var(--line);
+        padding: 1.6rem;
+        text-align: center;
+        font-size: 0.85rem;
+        color: var(--muted);
+    }
+</style>

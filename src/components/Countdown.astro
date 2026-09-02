@@ -3,24 +3,79 @@ const { label, deadline } = Astro.props;
 ---
 
 <div class="chip">
-    <span>{label}</span>
-    <span data-deadline={deadline}>-</span>
+    <p class="chip__label">{label}</p>
+    <p class="chip__value">
+        <span class="chip__num" data-deadline={deadline}>–</span>
+        <span class="chip__unit">days</span>
+    </p>
 </div>
+
+<style>
+    /* 箱で囲まず、左に1本線を立てるだけ。
+       サイトが「線で区切る」方針なので、枠を増やすと重くなります */
+    .chip {
+        border-left: 2px solid var(--accent);
+        padding: 0.5rem 0 0.5rem 0.9rem;
+    }
+
+    /* ブラウザ既定の <p> の余白を消す。
+       これが残っていると、数字の大きさぶん上下に隙間が空きます */
+    .chip__label, .chip__value { margin: 0; }
+
+    /* ラベルは小さく、数字は大きく。
+       この対比が StatCard と揃っているので、同じ種類の情報に見えます */
+    .chip__label {
+        font-size: 0.75rem;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-bottom: 0.15rem;
+    }
+
+    .chip__value {
+        display: flex;
+        align-items: baseline;   /* 数字と days の下端を揃える */
+        gap: 0.3rem;
+    }
+
+    .chip__num {
+        font-family: var(--font-display);
+        font-size: 2.4rem;
+        line-height: 1;
+        color: var(--text);
+    }
+
+    .chip__unit {
+        font-family: var(--font-display);
+        font-size: 0.8rem;
+        color: var(--muted);
+    }
+
+    /* 過ぎた予定は、控えめに引っ込める */
+    .chip.is-done { border-left-color: var(--line); }
+    .chip.is-done .chip__num { font-size: 1.3rem; color: var(--muted); }
+    .chip.is-done .chip__unit { display: none; }
+</style>
 
 <script>
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  document.querySelectorAll<HTMLElement>('[data-deadline]').forEach(el => {
+  document.querySelectorAll<HTMLElement>('[data-deadline]').forEach((el) => {
     const raw = el.dataset.deadline;
     if (!raw) return;
 
+    // "2026-09-04" を数値3つに分けて渡す。
+    // 文字列のまま new Date() に渡すと協定世界時として読まれ、日本時間とズレるため
     const [y, m, d] = raw.split('-').map(Number);
     const target = new Date(y, m - 1, d);
+    const days = Math.ceil((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
-    const diffMs = target.getTime() - today.getTime();
-    const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-
-    el.textContent = days > 0 ? days + ' days' : 'done';
+    if (days > 0) {
+      // 数字だけを入れる。"days" はHTML側に固定で置いてある
+      el.textContent = String(days);
+    } else {
+      el.textContent = '終了';
+      el.closest('.chip')?.classList.add('is-done');
+    }
   });
 </script>

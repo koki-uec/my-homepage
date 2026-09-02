@@ -1,3 +1,7 @@
+<!-- 盤とスコアをまとめる箱。アワードの色はここに流し込むので、
+     盤の閃光と文字の両方が同じ色を使えます -->
+<div class="board-area">
+
 <div class="board" aria-hidden="true">
 
         <!-- ここから中身が丸ごと回る。見た目と当たり判定をズラさないため -->
@@ -38,15 +42,56 @@
 
         </div>
 
+        <!-- アワードが出たときに盤全体が光る層。
+             得点の文字より前に置いて、文字が光に埋もれないようにする -->
+        <div class="board__flash"></div>
+
         <!-- 得点の表示。回らないので board__spin の外に置く -->
         <p class="board__score"></p>
 </div>
 
+<!-- 3投で1ラウンド。3投目でアワードを判定します。
+     普段は沈んでいて、投げた瞬間に立ち上がります -->
+<div class="round">
+  <ul class="round__darts">
+    <li class="round__dart"></li>
+    <li class="round__dart"></li>
+    <li class="round__dart"></li>
+  </ul>
+  <p class="round__sum"></p>
+  <p class="round__award"></p>
+</div>
+
+</div>
+
 <style>
+    /* 盤とスコアをまとめる箱。アワードの色はここに載せる。
+       ★横に置けるなら横、無理なら下に回す★
+       flex-wrap があるので、幅が足りなくなった時点で
+       スコアが自動で盤の下へ折り返します。切り替えの指定は要りません */
+    .board-area {
+    --award-color: var(--accent);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 28px;
+    }
+
     /* ダーツボード
     中身はすべて % で組んであるので、.board の width を変えれば全体が拡大縮小します */
     .board {
     --size: 220px;              /* 盤の大きさはここ1箇所で決める */
+
+    /* ★盤の色はここだけで決まる★
+       もともと暗い背景専用に組んであったので、明るい背景用に置き換えました。
+       サイトの配色（--bg / --panel / --accent / --red）から作っているので、
+       global.css の配色を差し替えれば盤も一緒に追随します。 */
+    --board-face-1: var(--panel);            /* くさびの明るいほう */
+    --board-face-2: var(--bg);               /* くさびの暗いほう（明暗が逆転） */
+    --board-wire:   rgba(0, 0, 0, .13);      /* 18度ごとの区切り線 */
+    --board-shade:  rgba(0, 0, 0, .035);     /* くさびの濃淡 */
+    --board-ring:   rgba(0, 0, 0, .18);      /* ブルの輪郭 */
+
     position: relative; width: var(--size); height: var(--size);
     flex-shrink: 0; cursor: crosshair;
 
@@ -58,9 +103,12 @@
     /* スマホでタップしたときに出る灰色の矩形も消す */
     -webkit-tap-highlight-color: transparent;
     }
+    /* 暗い背景では「盤の後ろの照明」だった層。
+       明るい背景では光が見えないので、影に置き換えて盤を浮かせる */
     .board::before {
-    content: ""; position: absolute; inset: -18%;
-    background: radial-gradient(circle, rgba(233,161,59,.14), transparent 65%);
+    content: ""; position: absolute; inset: -6%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,0,0,.06), transparent 70%);
     }
 
     /* 回る部分をまとめる箱。面も帯も数字も、これ1つで一緒に回る＝見た目と当たり判定がズレない */
@@ -84,12 +132,12 @@
     position: absolute; inset: 0; border-radius: 50%;
     background:
         repeating-conic-gradient(from -9deg,
-        rgba(236,228,216,.16) 0deg .6deg, transparent .6deg 18deg),
+        var(--board-wire) 0deg .6deg, transparent .6deg 18deg),
         repeating-conic-gradient(from -9deg,
-        rgba(236,228,216,.022) 0deg 18deg, transparent 18deg 36deg),
+        var(--board-shade) 0deg 18deg, transparent 18deg 36deg),
         /* ★一番下は不透明にする★
-        ここを透かすと、board::before のアンバーの光が盤全体に透けて濁る */
-        radial-gradient(circle at 50% 36%, #191514, #100D0C 80%);
+        ここを透かすと、board::before の影が盤全体に透けて濁ります */
+        var(--board-face-1);
     border: 1px solid var(--line);
     }
 
@@ -98,25 +146,39 @@
     .board__band {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
     border-radius: 50%;
-    opacity: .38; transition: opacity .4s ease;
+    /* 読み取れる範囲でいちばん静かな濃さ */
+    opacity: .45; transition: opacity .4s ease;
     }
-    .board:hover .board__band { opacity: 1; }
+    .board:hover .board__band { opacity: .85; }
 
     /* ★mask で真ん中をくり抜いてリングにする★
     mask は「不透明なところだけ表示、透明なところは消す」型抜き。
     closest-side を使うと、この要素の半径が100%基準になる。
     → 86%までは消す ＝ 86%〜100% のドーナツだけが残る */
+    /* ★交互の作り方★
+       片方を transparent にすると1つおきの帯が丸ごと消えます。
+       かといって別の色を足すと、2色が殴り合って濁ります。
+       正解は「同じ色の濃さを変える」。色は1つのまま区画が読み取れます。
+
+       color-mix() は「この色を〇%に薄める」という命令。
+       1行目は非対応ブラウザ向けの控えで、対応していれば2行目が上書きします。 */
     .board__band--triple {
     width: 64%; height: 64%;
     background: repeating-conic-gradient(from -9deg,
-        rgba(233,161,59,.40) 0deg 18deg, rgba(233,161,59,.09) 18deg 36deg);
+        var(--accent) 0deg 18deg, var(--line) 18deg 36deg);
+    background: repeating-conic-gradient(from -9deg,
+        var(--accent) 0deg 18deg,
+        color-mix(in srgb, var(--accent) 40%, transparent) 18deg 36deg);
     -webkit-mask-image: radial-gradient(closest-side, transparent 86%, #000 86%);
             mask-image: radial-gradient(closest-side, transparent 86%, #000 86%);
     }
     .board__band--double {
     width: 100%; height: 100%;
     background: repeating-conic-gradient(from -9deg,
-        rgba(178,58,47,.55) 0deg 18deg, rgba(178,58,47,.13) 18deg 36deg);
+        var(--accent) 0deg 18deg, var(--line) 18deg 36deg);
+    background: repeating-conic-gradient(from -9deg,
+        var(--accent) 0deg 18deg,
+        color-mix(in srgb, var(--accent) 40%, transparent) 18deg 36deg);
     -webkit-mask-image: radial-gradient(closest-side, transparent 91%, #000 91%);
             mask-image: radial-gradient(closest-side, transparent 91%, #000 91%);
     }
@@ -136,12 +198,96 @@
     .board__bull-out {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
     width: 13%; height: 13%; border-radius: 50%;
-    border: 1px solid rgba(236,228,216,.22);
+    border: 1px solid var(--board-ring);
     }
     .board__bull {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
     width: 6%; height: 6%; border-radius: 50%; background: var(--red);
-    box-shadow: 0 0 12px rgba(178,58,47,.9);
+    /* 明るい背景では発光が見えないので、影は付けない */
+    }
+
+    /* アワードが出た瞬間、盤全体がその色に光る */
+    .board__flash {
+    position: absolute; inset: -10%; border-radius: 50%;
+    background: radial-gradient(circle, var(--award-color) 0%, transparent 62%);
+    opacity: 0; pointer-events: none;
+    }
+    .board__flash.is-on { animation: board-flash .9s ease-out forwards; }
+    @keyframes board-flash {
+    0%   { opacity: 0;   transform: scale(.72); }
+    20%  { opacity: .30; transform: scale(1); }
+    100% { opacity: 0;   transform: scale(1.2); }
+    }
+
+    /* ★普段は沈んでいて、投げた瞬間に立ち上がる★
+    何も投げていないときは細い線が3本あるだけ */
+    .round {
+    display: grid; gap: 6px; justify-items: center;
+    flex: 1 1 190px;          /* 横に置けるだけの幅が無ければ、下へ折り返す */
+    opacity: .35; transition: opacity .5s ease;
+    }
+    .round.is-live,
+    .board-area:hover .round { opacity: 1; }
+
+    /* 3投ぶんの記録。箱で囲まず、下線だけの軽いスコアカードにする */
+    .round__darts { display: flex; gap: 12px; margin: 0; padding: 0; }
+    .round__dart {
+    display: grid; place-items: center; position: relative;
+    min-width: 54px; height: 22px;
+    font-family: var(--font-display); font-size: 12px; letter-spacing: .08em;
+    color: var(--text);
+    transition: color .3s ease;
+    }
+    .round__dart.is-hi { color: var(--accent); }
+    .round__dart::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0;
+    height: 1px; background: var(--line);
+    transition: background-color .35s ease;
+    }
+    .round__dart.is-filled::after {
+    background: var(--accent);
+    animation: dart-line .45s cubic-bezier(.2,.9,.25,1);
+    }
+    @keyframes dart-line { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+    /* 合計点。ラベルは置かない。盤の下の数字が何かは説明しなくても伝わる */
+    .round__sum {
+    min-height: 1em; margin: 0; text-align: center;
+    font-family: var(--font-display); font-size: 24px; line-height: 1;
+    /* 字間を広げると右にずれて見えるので、同じ量だけ左へ戻して中央を保つ */
+    letter-spacing: .18em; text-indent: .18em;
+    color: var(--muted);
+    transition: color .4s ease;
+    }
+    .round.is-complete .round__sum { color: var(--text); }
+
+    /* アワード。出ていないときも高さを確保して行がガタつかないようにする */
+    /* 出ていないときも高さを確保して、行がガタつかないようにする。
+       ただし確保しすぎると合計点との間が空くので、1行ぶんに絞る */
+    .round__award {
+    min-height: 1.5em; margin: 0; text-align: center;
+    opacity: 0;
+    }
+    .round__award.is-on { animation: award-pop .9s cubic-bezier(.16,1,.3,1) forwards; }
+    .round__award b {
+    font-family: var(--font-display); font-size: 16px; letter-spacing: .16em;
+    color: var(--award-color);
+    }
+    /* ★letter-spacing は動かさないこと★
+    transform や opacity と違って文字列の幅が実際に変わるため、
+    長い名前（THREE IN THE BLACK）だと枠を押し広げてページが揺れます */
+    @keyframes award-pop {
+    0%   { opacity: 0; transform: scale(1.65) translateY(4px); filter: blur(10px); }
+    34%  { opacity: 1; transform: scale(.94)  translateY(0);   filter: blur(0); }
+    52%  {             transform: scale(1.07) translateY(0); }
+    70%  {             transform: scale(.985) translateY(0); }
+    100% { opacity: 1; transform: scale(1)    translateY(0);   filter: blur(0); }
+    }
+
+    /* アニメを切っている人向け。
+    「不透明度0＋アニメで見せる」作りなので、止めると永久に見えなくなる */
+    @media (prefers-reduced-motion: reduce) {
+    .board__score.is-on, .round__award.is-on { opacity: 1; }
     }
 
     /* ★仕組み★ liを18度ずつ回す（360÷20=18）。中のspanは上端中央にあるので円周上を動く */
@@ -159,18 +305,17 @@
     position: absolute; inset: 0;
     display: grid; place-items: center;
     font-family: var(--font-display); font-size: 24px; letter-spacing: .14em;
-    color: var(--text);        /* シングルとミスは白 */
-    text-shadow: 0 0 18px var(--bg), 0 0 8px var(--bg), 0 0 3px var(--bg);
+    color: var(--text);        /* シングルとミスは本文色 */
+    /* 背景色で縁取りして、盤の模様の上でも読めるようにする */
+    text-shadow: 0 0 12px var(--bg), 0 0 6px var(--bg), 0 0 2px var(--bg);
     pointer-events: none;      /* ★これが無いと文字がクリックを吸ってしまう */
     opacity: 0;
     }
-    /* ★トリプル・ダブル・ブルだけアンバー★
-    付け外しは script.js の isPremium() が判断しています。
-    光も色に合わせると、白と黄色の差がはっきり出ます。 */
+    /* ★トリプル・ダブル・ブルだけアクセント色★
+    付け外しは JS の isPremium() が判断します（盤のJSを入れたら有効になります）。 */
     .board__score.is-hi {
     color: var(--accent);
-    text-shadow: 0 0 20px var(--bg), 0 0 8px var(--bg),
-                0 0 26px rgba(233,161,59,.45);
+    text-shadow: 0 0 12px var(--bg), 0 0 6px var(--bg), 0 0 2px var(--bg);
     }
 
     /* 中央に出したまま留めず、上へ抜けながら消える。
@@ -190,5 +335,200 @@
 </style>
 
 <script>
-    
+  /* ============================================================
+     盤のクリック判定。考え方は2つだけ。
+       ・中心からの「距離」  → シングル / ダブル / トリプル / ブル
+       ・中心から見た「角度」→ 何番のところか
+     ============================================================ */
+
+  // 1本ぶんの結果の形
+  type Hit = { area: string; number: number; points: number; label: string; short: string };
+
+  // 真上から時計回りの、実物と同じ数字の並び（HTMLの --i と同じ順番）
+  const BOARD_NUMBERS = [20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
+
+  // 中心からの距離の境目。半径を 1 としたときの値。
+  // ★CSSの board__band / board__bull の % と対応★
+  //   片方だけ変えると見た目と判定がズレるので、必ずセットで直すこと。
+  const R_BULL       = 0.06;   // インナーブル（.board__bull      の width 6%）
+  const R_OUTER_BULL = 0.13;   // アウターブル（.board__bull-out  の width 13%）
+  const R_TRIPLE_IN  = 0.55;   // トリプル内側（64% × mask 86% ≒ 0.55）
+  const R_TRIPLE_OUT = 0.64;   // トリプル外側（.board__band--triple の width 64%）
+  const R_DOUBLE_IN  = 0.91;   // ダブル内側  （100% × mask 91%）
+
+  /* 中心からの距離で、1本ぶんの結果を決める。
+     アワード判定で「どのエリアの何番か」が要るので、文字列ではなくデータで返す */
+  function judgeHit(r: number, n: number): Hit {
+    if (r <= R_BULL)
+      return { area: 'IBULL', number: 25, points: 50, label: 'D-BULL 50', short: 'D-BULL' };
+    if (r <= R_OUTER_BULL)
+      return { area: 'OBULL', number: 25, points: 50, label: 'S-BULL 50', short: 'S-BULL' };
+    if (r > 1)
+      return { area: 'MISS', number: 0, points: 0, label: 'MISS', short: 'MISS' };
+    if (r >= R_DOUBLE_IN)
+      return { area: 'D', number: n, points: n * 2, label: 'D' + n + ' = ' + (n * 2), short: 'D' + n };
+    if (r >= R_TRIPLE_IN && r <= R_TRIPLE_OUT)
+      return { area: 'T', number: n, points: n * 3, label: 'T' + n + ' = ' + (n * 3), short: 'T' + n };
+    return { area: 'S', number: n, points: n, label: String(n), short: String(n) };
+  }
+
+  // トリプル・ダブル・ブルは「おいしい場所」なので色を変える
+  function isPremium(area: string) {
+    return area === 'T' || area === 'D' || area === 'IBULL' || area === 'OBULL';
+  }
+
+  /* 3投からアワードを判定する。条件は DARTSLIVE 公式に合わせています。
+     ★上に書いたものが優先★ 強いものから順に判定し、最初に当たったものを返す。
+     （例：T20×3 は THREE IN A BED でもありますが TON 80 が勝ちます） */
+  function judgeAward(round: Hit[]) {
+    const points = round.reduce((sum, h) => sum + h.points, 0);
+    const areas  = round.map(h => h.area);
+    const nums   = round.map(h => h.number);
+    const bulls  = areas.filter(a => a === 'IBULL' || a === 'OBULL').length;
+    const allSame = (arr: (string | number)[]) => arr.every(v => v === arr[0]);
+
+    if (allSame(areas) && areas[0] === 'T' && allSame(nums) && nums[0] === 20)
+      return { name: 'TON 80', color: '#F0662A' };
+    if (allSame(areas) && areas[0] === 'IBULL')
+      // 「黒」は文字が消えるので、色は銀寄りにして雰囲気で見せる
+      return { name: 'THREE IN THE BLACK', color: '#6E6A78' };
+    if (bulls === 3)
+      return { name: 'HAT TRICK', color: '#D6392B' };
+    if (allSame(areas) && (areas[0] === 'T' || areas[0] === 'D') && allSame(nums))
+      return { name: 'THREE IN A BED', color: '#8E63C7' };
+    if (allSame(areas) && areas[0] === 'T'
+        && new Set(nums).size === 3 && nums.every(n => n >= 15 && n <= 20))
+      return { name: 'WHITE HORSE', color: '#5B7C93' };
+    if (points >= 151) return { name: 'HIGH TON', color: '#C08A1E' };
+    if (points >= 100) return { name: 'LOW TON',  color: '#2B6CB0' };
+    if (bulls >= 1)    return { name: 'NICE ONE', color: '#4E9B2F' };
+    return null;
+  }
+
+  // 盤が今何度回っているかを、実際に適用されているCSSから読み取る
+  function rotationOf(el: HTMLElement) {
+    const t = getComputedStyle(el).transform;
+    if (t === 'none') return 0;              // アニメを切っている場合
+    const m = new DOMMatrixReadOnly(t);
+    return Math.atan2(m.b, m.a) * 180 / Math.PI;
+  }
+
+  function setupBoard() {
+    const area  = document.querySelector<HTMLElement>('.board-area');
+    const board = document.querySelector<HTMLElement>('.board');
+    if (!area || !board) return;
+
+    const spin  = board.querySelector<HTMLElement>('.board__spin');
+    const play  = board.querySelector<HTMLElement>('.board__play');
+    const label = board.querySelector<HTMLElement>('.board__score');
+    const flash = board.querySelector<HTMLElement>('.board__flash');
+    if (!spin || !play || !label) return;
+
+    const roundEl = area.querySelector<HTMLElement>('.round');
+    const slots   = area.querySelectorAll<HTMLElement>('.round__dart');
+    const total   = area.querySelector<HTMLElement>('.round__sum');
+    const awardEl = area.querySelector<HTMLElement>('.round__award');
+
+    let round: Hit[] = [];
+    let timer: number | undefined;
+    let awardTimer: number | undefined;
+
+    // pointerdown はマウスのクリックもスマホのタップも両方拾う
+    board.addEventListener('pointerdown', (e) => {
+      // (1) 得点エリアの中心から、クリック位置がどれだけズレているか
+      const rect = play.getBoundingClientRect();
+      const dx = e.clientX - (rect.left + rect.width / 2);
+      const dy = e.clientY - (rect.top + rect.height / 2);
+
+      // ★半径は offsetWidth から取る★
+      //   getBoundingClientRect() は「回転した正方形を囲む四角形」を返すので、
+      //   回転中は最大1.41倍まで膨らんで距離の基準に使えない。
+      const r = Math.hypot(dx, dy) / (play.offsetWidth / 2);
+
+      // (2) 真上を0度とした時計回りの角度
+      const screenDeg = Math.atan2(dx, -dy) * 180 / Math.PI;
+
+      // (3) 盤は回り続けているので、今の回転ぶんを引いて盤基準に戻す
+      const deg = (((screenDeg - rotationOf(spin)) % 360) + 360) % 360;
+
+      // (4) 18度ごとに区切って、何番のところかを決める
+      const number = BOARD_NUMBERS[Math.round(deg / 18) % 20];
+
+      // (5) 1本ぶんの結果を出して、盤の中央に表示する
+      const hit = judgeHit(r, number);
+      label.textContent = hit.label;
+      label.classList.toggle('is-hi', isPremium(hit.area));
+      label.classList.remove('is-on');
+      void label.offsetWidth;          // 一度レイアウトを読ませてアニメを最初から再生
+      label.classList.add('is-on');
+
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => label.classList.remove('is-on'), 1200);
+
+      // (6) ラウンドに積む。3投終わっていたら次の1投目として仕切り直す
+      if (round.length >= 3) round = [];
+      round.push(hit);
+      renderRound();
+    });
+
+    function renderRound() {
+      if (!slots.length) return;
+
+      slots.forEach((slot, i) => {
+        const hit = round[i];
+        slot.textContent = hit ? hit.short : '';       // 空の枠は線だけ
+        slot.classList.toggle('is-filled', Boolean(hit));
+        slot.classList.toggle('is-hi', Boolean(hit) && isPremium(hit.area));
+      });
+
+      // 合計点は1投でも投げてから出す（0 を置きっぱなしにしない）
+      if (total) {
+        total.textContent = round.length
+          ? String(round.reduce((sum, h) => sum + h.points, 0))
+          : '';
+      }
+
+      if (roundEl) {
+        roundEl.classList.toggle('is-live', round.length > 0);
+        roundEl.classList.toggle('is-complete', round.length === 3);
+      }
+
+      if (!awardEl) return;
+      awardEl.classList.remove('is-on');
+
+      if (round.length < 3) {
+        // 前のラウンドのアワードは、消えるアニメが終わってから中身も片付ける
+        window.clearTimeout(awardTimer);
+        awardTimer = window.setTimeout(() => {
+          if (round.length < 3) awardEl.replaceChildren();
+        }, 320);
+        return;
+      }
+      window.clearTimeout(awardTimer);
+
+      const award = judgeAward(round);
+      // ★アワード無しのときも中身を消す★
+      // 消さないと、前のラウンドの名前が（見えないまま）残り続けます
+      if (!award) { awardEl.replaceChildren(); return; }
+
+      // アワードの色を親に流し込む。盤の閃光と文字の両方がこれを使う
+      area.style.setProperty('--award-color', award.color);
+
+      if (flash) {
+        flash.classList.remove('is-on');
+        void flash.offsetWidth;
+        flash.classList.add('is-on');
+      }
+
+      awardEl.replaceChildren();
+      const name = document.createElement('b');
+      name.textContent = award.name;
+      awardEl.append(name);
+
+      void awardEl.offsetWidth;
+      awardEl.classList.add('is-on');
+    }
+  }
+
+  setupBoard();
 </script>

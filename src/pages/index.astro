@@ -1,34 +1,185 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import data from '../data/posts.json';
-const posts = data.posts;
 import Countdown from '../components/Countdown.astro';
+import LinkCard from '../components/LinkCard.astro';
+
+import postData from '../data/posts.json';
+import linkData from '../data/links.json';
+
+const posts = postData.posts;
+const links = linkData;
+
+// 記録に出てくる種類を重複なしで集める。
+// ALLボタンは置かず、「選択中をもう一度押すと解除」で全件に戻します
+const kinds = [...new Set(posts.map(p => p.src))];
 ---
 
 <Layout title="しーのホームページ">
-	<img src="/images/icon.jpg" alt="プロフィール写真" class="profile-img" /> 
-	<h1>しー</h1>
-	<p>電気通信大学情報理工学域Ⅰ類</p>
 
-	<Countdown label="軽音夏合宿まで" deadline="2026-09-04" />
-	<Countdown label="調布祭まで" deadline="2026-11-20" />
+	<div class="hero">
+		<img src="/images/icon.jpg" alt="プロフィール写真" class="profile-img" />
+		<div>
+			<h1>しー</h1>
+			<p class="role">電気通信大学 情報理工学域Ⅰ類</p>
+			<p class="tagline">ダーツ / ドラム / リズムゲーム</p>
+		</div>
+	</div>
 
-	<ul>
-  {posts.map((post) => (
-    <li>{post.src} - {post.date} — {post.text}</li>
-  ))}
+	<h2>COUNTDOWN</h2>
+	<div class="chips">
+		<Countdown label="軽音夏合宿まで" deadline="2026-09-04" />
+		<Countdown label="調布祭まで" deadline="2026-11-20" />
+	</div>
 
-  <br>
-  ここに相互リンク
-</ul>
+	<h2>LOG</h2>
+	<div class="log-filter">
+		{kinds.map((kind) => (
+			<button type="button" data-filter={kind}>{kind}</button>
+		))}
+	</div>
+
+	<ul class="posts">
+		{posts.map((post) => (
+			<li data-src={post.src}>
+				<time>{post.date}</time>
+				<span class="tag">{post.src}</span>
+				<span>{post.text}</span>
+			</li>
+		))}
+	</ul>
+
+	<h2>LINKS</h2>
+	<div class="links">
+		{links.map((l) => (
+			<LinkCard name={l.name} url={l.url} note={l.note} icon={l.icon} />
+		))}
+	</div>
 
 </Layout>
 
 <style>
+	/* ヘッダー */
+	.hero {
+		display: flex;
+		align-items: center;
+		gap: 22px;
+		margin-bottom: 2.5rem;
+	}
+
 	.profile-img {
-		width: 120px;
-		height: 120px;
+		width: 88px;
+		height: 88px;
 		border-radius: 50%;
 		object-fit: cover;
+		flex-shrink: 0;      /* 名前が長くても写真は潰れない */
+	}
+
+	.hero h1 { font-size: 2.2rem; letter-spacing: 0.02em; }
+	.hero .role { font-size: 0.85rem; color: var(--muted); margin-top: 2px; }
+
+	/* 一言だけアクセント色*/
+	.hero .tagline {
+		font-size: 0.85rem;
+		color: var(--accent);
+		margin-top: 6px;
+		letter-spacing: 0.04em;
+	}
+
+	/* カウントダウン 
+	   狭い画面では自動で1列に落ちる。単位は落ちない */
+	.chips {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 1.2rem;
+		margin-bottom: 2rem;
+	}
+
+	/* 記録の一覧 
+	   プロフィール表と同じで横並びと幅固定
+	   timeとtagの幅を決めたおかげで本文の左端が全行で揃う*/
+	.posts { border-top: 1px solid var(--line); margin-bottom: 2rem; }
+
+	.posts li {
+		display: flex;
+		gap: 1rem;
+		align-items: baseline;
+		padding-block: 0.7rem;
+		border-bottom: 1px solid var(--line);
+		font-size: 0.9rem;
+	}
+
+	/* 絞り込み必須ゾーン
+	   hidden は「[hidden] { display: none }」が当たっるだけ
+	   上の .posts li { display: flex } のほうが強い*/
+	.posts li[hidden] { display: none; }
+
+	.posts time { width: 7em; flex-shrink: 0; color: var(--muted); font-size: 0.8rem; }
+	.posts .tag { width: 4.5em; flex-shrink: 0; font-size: 0.65rem; letter-spacing: 0.1em; color: var(--accent); }
+
+	/* 絞り込みボタン
+	   ボタンはブラウザ既定の灰色の立体が強いからbackground と border で打ち消すよん */
+	.log-filter { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.2rem; }
+
+	.log-filter button {
+		font-family: inherit;
+		font-size: 0.75rem;
+		letter-spacing: 0.1em;
+		cursor: pointer;
+		padding: 0.35rem 0.9rem;
+		background: none;
+		border: 1px solid var(--line);
+		border-radius: 0;
+		color: var(--muted);
+		transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+	}
+	.log-filter button:hover { color: var(--accent); border-color: var(--accent); }
+
+	/* 選択中は色を反転させる */
+	.log-filter button.is-active {
+		background-color: var(--accent);
+		border-color: var(--accent);
+		color: var(--bg);
+	}
+
+	/* 相互リンク */
+	.links {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		gap: 0.8rem;
+		margin-bottom: 2rem;
+	}
+
+	/* 狭い画面では余白と写真を少し詰める */
+	@media (max-width: 420px) {
+		.hero { gap: 16px; }
+		.profile-img { width: 72px; height: 72px; }
+		.hero h1 { font-size: 1.8rem; }
 	}
 </style>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLElement>('.log-filter button');
+  const items = document.querySelectorAll<HTMLElement>('.posts li');
+
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const kind = btn.dataset.filter;
+
+      // 押す前に「これが選択中だったか」を覚えておく
+      const wasActive = btn.classList.contains('is-active');
+
+      buttons.forEach((b) => b.classList.remove('is-active'));
+
+      // 選択中をもう一度押したら、解除して全件に戻す（ALLボタンの代わり）
+      if (wasActive) {
+        items.forEach((li) => { li.hidden = false; });
+        return;
+      }
+
+      btn.classList.add('is-active');
+      items.forEach((li) => {
+        li.hidden = li.dataset.src !== kind;
+      });
+    });
+  });
+</script>
