@@ -6,6 +6,12 @@
     "icon": "/images/shiori_icon.jpg"
   },
   {
+    "name": "トラマト",
+    "url": "https://toramutton.me/",
+    "note": "Astroの記事ありがとナス！",
+    "icon": "/images/toramutton_icon.jpg"
+  },
+  {
     "name": "あみーご",
     "url": "https://amigo-homepage.vercel.app/",
     "note": "絵柄かわいすぎるぞ😠",
@@ -16,5 +22,11 @@
     "url": "https://my-homepage-one-murex.vercel.app/",
     "note": "教職erガチ尊敬",
     "icon": "/images/kaki_icon.jpg"
+  },
+  {
+    "name": "lanips",
+    "url": "https://lanips-homepage.vercel.app/",
+    "note": "ｺｯﾁﾐﾝﾅ",
+    "icon": "/images/lanips_icon.jpg"
   }
 ]
