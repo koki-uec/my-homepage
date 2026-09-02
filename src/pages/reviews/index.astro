@@ -10,14 +10,11 @@ type Review = {
     };
 };
 
-// ★このフォルダの .md を全部集める★
-// 記事ファイルを置くだけで一覧に載ります。ここを書き換える必要はありません。
+// このフォルダの .md を全部集める
 const modules = import.meta.glob<Review>('./*.md', { eager: true });
 
 const reviews = Object.entries(modules)
-    // ★「_」で始まるファイル（ひな形）を除く★
-    //   Astroは _ 始まりをページにしませんが、glob は読み込んでしまいます。
-    //   除かないと、開けないURLへのリンクが一覧に出ます。
+    // 「_」で始まるファイル（ひな形）を除く
     .filter(([path]) => !path.includes('/_'))
     .map(([, mod]) => mod)
     // 新しい順に並べる

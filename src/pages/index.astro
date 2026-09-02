@@ -10,8 +10,8 @@ import linkData from '../data/links.json';
 const posts = postData.posts;
 const links = linkData;
 
-// 記録に出てくる種類を重複なしで集める。
-// ALLボタンは置かず、「選択中をもう一度押すと解除」で全件に戻します
+// 記録に出てくる種類を重複なしで集める
+// 選択中をもう一度押すと戻す
 const kinds = [...new Set(posts.map(p => p.src))];
 ---
 

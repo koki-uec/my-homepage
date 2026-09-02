@@ -9,16 +9,13 @@ import '../styles/global.css';
 		<meta name="viewport" content="width=device-width" />
 		<title>{title}</title>
 
-		<!-- ★タブに出るアイコン★
-		     これを書かないと、ブラウザは勝手に /favicon.ico を探しに行きます。
-		     Astroのテンプレートに入っていたロゴはそれで拾われていました。
-		     apple-touch-icon はiPhoneでホーム画面に追加したときのアイコンです。 -->
+		<!-- iconはタブに出した時のアイコンで、
+		     apple-touch-icon はiPhoneでホーム画面に追加したときのアイコン。そこまで指定できるんかい -->
 		<link rel="icon" href="/images/favicon.jpg" />
 		<link rel="apple-touch-icon" href="/images/icon.jpg" />
+
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<!-- 書体は1本にまとめる。&family= でつなげば1回のリクエストで済む。
-		     Oswald は外した（コンデンス体は「硬派・バー」の記号で、今回の方向と逆） -->
 		<link
 			href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap"
 			rel="stylesheet"
@@ -38,8 +35,8 @@ import '../styles/global.css';
 			<slot />
 		</main>
 
-		<!-- outsideのslotとして指定したらmain以下footer以上の部分に出るようにしてるよん。
-		     囲いが要るのは、body の幅制限を外したので中身が全幅になってしまうため -->
+		<!-- outsideのslotとして指定したらmain以下footer以上の部分に出るようにしてる。
+		     囲いが要るのは、body の幅制限を外すと中身が全幅になるかららしい -->
 		<div class="outside">
 			<slot name="outside" />
 		</div>
@@ -49,17 +46,9 @@ import '../styles/global.css';
 </html>
 
 <style>
-	/* ★body の幅制限を外した★
-	   前は body が max-width: 720px を持っていたので、
-	   その中にあるヘッダーの帯も720pxで途切れていました。
-	   幅の制限は body ではなく「中身のかたまり」側に持たせます。 */
 	body {
 		margin: 0;
 		padding: 0;
-		/* ★直書きをやめて変数へ★
-		   ここが直書きのままだと、global.css の --font-jp を変えても本文が変わりません。
-		   しかも Layout の <style> は「スコープ付き」で優先度が高いので、
-		   global.css 側に body { font-family } を書いても勝てません。 */
 		font-family: var(--font-jp);
 		line-height: 1.8;
 		color: var(--text);
@@ -67,7 +56,7 @@ import '../styles/global.css';
 	}
 
 	/* 中身の幅をここでまとめて決める。
-	   ヘッダーの帯だけが全幅、中のナビは本文と同じ幅で揃う、という形になります */
+	   ヘッダーの帯だけが全幅、中のナビは本文と同じ幅で揃う*/
 	nav,
 	main,
 	.outside,
@@ -77,15 +66,7 @@ import '../styles/global.css';
 		padding-inline: 1.5rem;
 	}
 
-	/* ★ヘッダーを画面上部に貼り付ける★
-	   position: sticky は「普段は普通に置かれ、スクロールで指定位置まで来たら
-	   そこで止まる」という指定です。top: 0 なので画面の一番上で止まります。
-
-	   background が要るのがポイント。無いと、下の内容が透けて重なります。
-	   z-index は「重なり順」。本文より手前に出すために必要です。
-
-	   上の余白をヘッダー自身に持たせているのは、貼り付いたときに
-	   ナビが画面の縁に接しないようにするためです。 */
+	/* position: stickyキターーー🤩 */
 	header {
 		position: sticky;
 		top: 0;
@@ -93,7 +74,7 @@ import '../styles/global.css';
 		background-color: var(--bg);
 		padding-top: 0.9rem;
 		/* 罫線は nav ではなくヘッダーに引く。
-		   nav に引くと本文幅で途切れますが、ここなら画面の端まで伸びます */
+		   nav に引くと本文幅で途切れちゃう */
 		border-bottom: 1px solid var(--line);
 	}
 
@@ -108,7 +89,7 @@ import '../styles/global.css';
 		text-decoration: none;
 		transition: color 0.2s ease;
 		/* 指で押す面積を確保する。文字の高さは29pxしかないので、
-		   上下に余白を足して押しやすくしています */
+		   上下に余白を足して押しやすくしてる。なんて親切！ */
 		padding-block: 0.4rem;
 	}
 
@@ -132,14 +113,7 @@ import '../styles/global.css';
 		color: var(--muted);
 	}
 
-	/* ============================================================
-	   狭い画面向けの調整
-
-	   ★必ずファイルの最後に置くこと★
-	   メディアクエリは詳細度を上げません。同じ強さの指定どうしでは
-	   「後に書いたほうが勝つ」ので、前に置くと下の main { padding } などに
-	   打ち消されて効きません。
-	   ============================================================ */
+	/*ここからは狭い画面向けの調整。必ずファイルの最後に置こう。*/
 	@media (max-width: 520px) {
 		nav,
 		main,
@@ -151,7 +125,7 @@ import '../styles/global.css';
 		nav { gap: 1.1rem; overflow-x: auto; padding-bottom: 0.5rem; }
 		nav a { white-space: nowrap; }
 
-		/* スマホは画面の高さが貴重なので、固定ヘッダーをさらに薄くする */
+		/* スマホは画面の高さが大事だから固定ヘッダーをさらに薄くする */
 		header { padding-top: 0.6rem; }
 	}
 </style>
