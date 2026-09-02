@@ -43,7 +43,7 @@ const kinds = [...new Set(posts.map(p => p.src))];
 			<li data-src={post.src}>
 				<time>{post.date}</time>
 				<span class="tag">{post.src}</span>
-				<span>{post.text}</span>
+				<span class="post__text">{post.text}</span>
 			</li>
 		))}
 	</ul>
@@ -149,7 +149,21 @@ const kinds = [...new Set(posts.map(p => p.src))];
 		margin-bottom: 2rem;
 	}
 
-	/* 狭い画面では余白と写真を少し詰める */
+	/* --- 狭い画面 --- */
+	@media (max-width: 520px) {
+		/* ★LOGの1行を2段に折る★
+		   PCでは「日付｜タグ｜本文」を横一列にしていますが、
+		   スマホだと本文に55pxしか残らず、縦に細長く折り返してしまいます。
+		   日付とタグを1段目、本文を2段目に回して幅を取り戻します */
+		.posts li { flex-wrap: wrap; gap: 0.2rem 0.8rem; }
+		.posts time { width: auto; }
+		.posts .tag { width: auto; }
+		.posts .post__text { flex-basis: 100%; }
+
+		/* 押しやすいように、ボタンの高さを確保する */
+		.log-filter button { padding: 0.5rem 1rem; }
+	}
+
 	@media (max-width: 420px) {
 		.hero { gap: 16px; }
 		.profile-img { width: 72px; height: 72px; }

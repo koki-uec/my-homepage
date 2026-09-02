@@ -31,18 +31,24 @@ import '../styles/global.css';
 			<slot />
 		</main>
 
-		<slot name="outside" /> 
-		<!-- outsideのslotとして指定したらmain以下footer以上の部分に出るようにしてるよん -->
+		<!-- outsideのslotとして指定したらmain以下footer以上の部分に出るようにしてるよん。
+		     囲いが要るのは、body の幅制限を外したので中身が全幅になってしまうため -->
+		<div class="outside">
+			<slot name="outside" />
+		</div>
 
 		<footer>© 2026  しー</footer>
 	</body>
 </html>
 
 <style>
+	/* ★body の幅制限を外した★
+	   前は body が max-width: 720px を持っていたので、
+	   その中にあるヘッダーの帯も720pxで途切れていました。
+	   幅の制限は body ではなく「中身のかたまり」側に持たせます。 */
 	body {
-		max-width: 720px;
-		margin: 0 auto;
-		padding: 2rem 1.5rem;
+		margin: 0;
+		padding: 0;
 		/* ★直書きをやめて変数へ★
 		   ここが直書きのままだと、global.css の --font-jp を変えても本文が変わりません。
 		   しかも Layout の <style> は「スコープ付き」で優先度が高いので、
@@ -53,17 +59,50 @@ import '../styles/global.css';
 		background-color: var(--bg);
 	}
 
+	/* 中身の幅をここでまとめて決める。
+	   ヘッダーの帯だけが全幅、中のナビは本文と同じ幅で揃う、という形になります */
+	nav,
+	main,
+	.outside,
+	footer {
+		max-width: 720px;
+		margin-inline: auto;
+		padding-inline: 1.5rem;
+	}
+
+	/* ★ヘッダーを画面上部に貼り付ける★
+	   position: sticky は「普段は普通に置かれ、スクロールで指定位置まで来たら
+	   そこで止まる」という指定です。top: 0 なので画面の一番上で止まります。
+
+	   background が要るのがポイント。無いと、下の内容が透けて重なります。
+	   z-index は「重なり順」。本文より手前に出すために必要です。
+
+	   上の余白をヘッダー自身に持たせているのは、貼り付いたときに
+	   ナビが画面の縁に接しないようにするためです。 */
+	header {
+		position: sticky;
+		top: 0;
+		z-index: 10;
+		background-color: var(--bg);
+		padding-top: 0.9rem;
+		/* 罫線は nav ではなくヘッダーに引く。
+		   nav に引くと本文幅で途切れますが、ここなら画面の端まで伸びます */
+		border-bottom: 1px solid var(--line);
+	}
+
 	nav {
 		display: flex;
 		gap: 1.5rem;
-		padding-bottom: 1rem;
-		border-bottom: 1px solid var(--line);
+		padding-bottom: 0.7rem;
 	}
 
 	nav a {
 		color: var(--muted);
 		text-decoration: none;
 		transition: color 0.2s ease;
+		/* 指で押す面積を確保する。文字の高さは29pxしかないので、
+		   上下に余白を足して押しやすくしています */
+		padding-block: 0.4rem;
 	}
 
 	nav a:hover {
@@ -73,15 +112,39 @@ import '../styles/global.css';
 	main {
 		background-color: var(--panel);
 		border-radius: 0px;
-		/* box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08); */
-		padding: 2rem;
+		/* 左右の余白は上の共通ルールが持っているので、ここは上下だけ */
+		padding-block: 2rem;
 		margin-top: 1.5rem;
 	}
 
 	footer {
 		margin-top: 2rem;
 		padding-top: 1rem;
+		padding-bottom: 2rem;
 		font-size: 0.85rem;
 		color: var(--muted);
+	}
+
+	/* ============================================================
+	   狭い画面向けの調整
+
+	   ★必ずファイルの最後に置くこと★
+	   メディアクエリは詳細度を上げません。同じ強さの指定どうしでは
+	   「後に書いたほうが勝つ」ので、前に置くと下の main { padding } などに
+	   打ち消されて効きません。
+	   ============================================================ */
+	@media (max-width: 520px) {
+		nav,
+		main,
+		.outside,
+		footer { padding-inline: 1rem; }
+
+		main { padding-block: 1.4rem; }
+
+		nav { gap: 1.1rem; overflow-x: auto; padding-bottom: 0.5rem; }
+		nav a { white-space: nowrap; }
+
+		/* スマホは画面の高さが貴重なので、固定ヘッダーをさらに薄くする */
+		header { padding-top: 0.6rem; }
 	}
 </style>

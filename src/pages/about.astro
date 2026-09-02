@@ -125,12 +125,6 @@ import Board from '../components/Board.astro';
         display: block;
     }
 
-    @media (max-width: 420px) {
-        .intro { gap: 14px; }
-        .intro__icon { width: 68px; }
-        .profile-img { width: 68px; height: 68px; }
-    }
-
     /* 見出しの下の一言 */
     .lead {
         font-size: 0.85rem;
@@ -278,6 +272,31 @@ import Board from '../components/Board.astro';
 .social-links a:hover {
     background-color: var(--accent);
     color: var(--bg);
+}
+
+/* ============================================================
+   狭い画面向けの調整
+
+   ★必ずファイルの最後に置くこと★
+   メディアクエリは詳細度を上げません。同じ強さの指定どうしでは
+   「後に書いたほうが勝つ」ので、前に置くと下の .profile dd { flex: 1 }
+   などに打ち消されて効きません。実際それで一度効きませんでした。
+   ============================================================ */
+@media (max-width: 520px) {
+    /* プロフィール表を2段に折る。
+       横一列のままだと値に123pxしか残らず、部活名が3行に折り返します */
+    .profile > div { flex-wrap: wrap; gap: 0.15rem 1rem; }
+    .profile dt { width: auto; }
+    .profile dd { flex-basis: 100%; }
+
+    /* スタッツは縦3枚だと長いので、2列に収まる幅まで下げる */
+    .figures { grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); }
+}
+
+@media (max-width: 420px) {
+    .intro { gap: 14px; }
+    .intro__icon { width: 68px; }
+    .profile-img { width: 68px; height: 68px; }
 }
 </style>
 
