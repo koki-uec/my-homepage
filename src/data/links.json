@@ -28,5 +28,11 @@
     "url": "https://lanips-homepage.vercel.app/",
     "note": "ｺｯﾁﾐﾝﾅ",
     "icon": "/images/lanips_icon.jpg"
+  },
+  {
+    "name": "チャート",
+    "url": "https://portfolio-chart-labo.vercel.app/",
+    "note": "サイト全体のテーマがおしゃれすぎてめっちゃびっくりしたなんだこれ",
+    "icon": "/images/chart_icon.jpg"
   }
 ]
