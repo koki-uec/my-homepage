@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Countdown from '../components/Countdown.astro';
 import LinkCard from '../components/LinkCard.astro';
+import NowPlaying from '../components/NowPlaying.astro';
 
 import postData from '../data/posts.json';
 import linkData from '../data/links.json';
@@ -47,6 +48,9 @@ const kinds = [...new Set(posts.map(p => p.src))];
 			</li>
 		))}
 	</ul>
+
+	<h2>NOW PLAYING</h2>
+	<NowPlaying />
 
 	<h2>LINKS</h2>
 	<div class="links">

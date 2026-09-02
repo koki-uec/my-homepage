@@ -1,0 +1,157 @@
+---
+import songs from '../data/songs.json';
+---
+
+<!-- ★全曲ぶんを書き出して、表示するのは1つだけ★
+     Astroは「ビルドしたときに1回だけHTMLを作る」仕組みなので、
+     ここでランダムに1曲選ぶと、次にデプロイするまでずっと同じ曲になります。
+     そこで曲は全部書き出しておき、「どれを見せるか」だけを
+     下の <script>（＝ブラウザ側）で決めます。これで開くたびに変わります。
+
+     hidden={i !== 0} は「1曲目以外は最初から隠す」という指定。
+     JavaScriptが動かない環境でも1曲目だけは出るので、空欄になりません。 -->
+<ul class="np">
+	{songs.map((song, i) => (
+		<li class="np__item" hidden={i !== 0}>
+
+			<!-- ジャケット。画像が無い曲は音符のマークで代用します。
+			     LINKSのカードでアイコンが無いときに頭文字を出しているのと同じ考え方 -->
+			<div class="np__art">
+				{song.art
+					? <img src={song.art} alt={song.title} />
+					: <span aria-hidden="true">♪</span>}
+			</div>
+
+			<div class="np__body">
+				<p class="np__meta">
+					<span class="np__eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+					<span class="np__label">ON REPEAT</span>
+				</p>
+				<p class="np__title">{song.title}</p>
+				<p class="np__artist">{song.artist}</p>
+				{song.note && <p class="np__note">{song.note}</p>}
+			</div>
+
+		</li>
+	))}
+</ul>
+
+<style>
+	/* ulの既定の余白と行頭記号を消す。
+	   global.css で list-style は消してありますが、余白は残っています */
+	.np { margin: 0 0 2rem; padding: 0; }
+
+	/* 左の縦線はCOUNTDOWNのチップと同じ処理。
+	   囲うのではなく1本の線で示す、というのがこのサイトの作法 */
+	.np__item {
+		display: flex;
+		align-items: center;
+		gap: 16px;
+		border-left: 2px solid var(--accent);
+		padding-left: 16px;
+	}
+
+	/* ★これが無いと隠れません★
+	   hidden属性に効いているのはブラウザ既定の [hidden] { display: none } で、
+	   上の .np__item { display: flex } のほうが強いので打ち消されます。
+	   LOGの絞り込みでも同じところでつまずきました */
+	.np__item[hidden] { display: none; }
+
+	.np__art {
+		width: 64px;
+		height: 64px;
+		flex-shrink: 0;          /* 曲名が長くてもジャケットは潰れない */
+		display: grid;
+		place-items: center;
+		background: var(--line);
+		color: var(--muted);
+		font-size: 20px;
+	}
+
+	.np__art img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;       /* 正方形でない画像も歪めずに切り取る */
+		display: block;
+	}
+
+	/* min-width: 0 が要ります。
+	   フレックスの子は既定で「中身より小さくならない」ので、
+	   これが無いと長い曲名が箱を押し広げてはみ出します */
+	.np__body { min-width: 0; }
+
+	.np__meta {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin: 0 0 2px;
+	}
+
+	.np__label {
+		font-family: var(--font-display);
+		font-size: 0.65rem;
+		letter-spacing: 0.18em;
+		color: var(--muted);
+	}
+
+	.np__title { margin: 0; font-size: 0.95rem; line-height: 1.5; }
+	.np__artist { margin: 0; font-size: 0.8rem; color: var(--muted); }
+	.np__note { margin: 4px 0 0; font-size: 0.75rem; color: var(--muted); }
+
+	/* ★振り切るのはここ1点だけ★
+	   動くのはこの4本の棒だけにして、あとは静かに保ちます */
+	.np__eq {
+		display: flex;
+		align-items: flex-end;
+		gap: 3px;
+		height: 13px;
+	}
+
+	.np__eq i {
+		display: block;
+		width: 3px;
+		background: var(--accent);
+		animation: np-bounce 1.1s ease-in-out infinite;
+	}
+
+	/* 4本が同時に動くと「点滅」に見えるので、ずらして波にする */
+	.np__eq i:nth-child(2) { animation-delay: 0.25s; }
+	.np__eq i:nth-child(3) { animation-delay: 0.5s; }
+	.np__eq i:nth-child(4) { animation-delay: 0.15s; }
+
+	@keyframes np-bounce {
+		0%, 100% { height: 4px; }
+		50%      { height: 13px; }
+	}
+
+	/* アニメを切っている人向け。
+	   高さをアニメで作っているので、止めると4px のままになります。
+	   潰れて見えないよう、静止した状態の高さを与えておきます */
+	@media (prefers-reduced-motion: reduce) {
+		.np__eq i { animation: none; height: 9px; }
+	}
+
+	/* ============================================================
+	   狭い画面向けの調整　★必ずファイルの最後に置くこと★
+	   メディアクエリは詳細度を上げないので、前に置くと
+	   後ろの指定に打ち消されます
+	   ============================================================ */
+	@media (max-width: 420px) {
+		.np__item { gap: 12px; padding-left: 12px; }
+		.np__art { width: 54px; height: 54px; }
+	}
+</style>
+
+<script>
+	/* 開くたびに1曲を選び直す。
+	   やっていることはLOGの絞り込みと同じで、hidden の付け外しだけです */
+	const items = document.querySelectorAll<HTMLElement>('.np__item');
+
+	if (items.length > 1) {
+		// Math.random() は 0以上1未満。曲数を掛けて切り捨てると 0〜(曲数-1) になる
+		const pick = Math.floor(Math.random() * items.length);
+		items.forEach((li, i) => {
+			li.hidden = i !== pick;
+		});
+	}
+</script>
