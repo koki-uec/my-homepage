@@ -66,15 +66,40 @@
 
 <style>
     /* 盤とスコアをまとめる箱。アワードの色はここに載せる。
-       ★横に置けるなら横、無理なら下に回す★
-       flex-wrap があるので、幅が足りなくなった時点で
-       スコアが自動で盤の下へ折り返します。切り替えの指定は要りません */
+
+       ★盤そのものを本文のど真ん中に置くための仕掛け★
+       「盤＋スコア」を横に並べて中央寄せしただけだと、かたまりの中心は
+       合っても、盤は右にあるスコアの幅ぶんだけ左に寄って見えます。
+       （実測で 109px 左でした）
+
+       そこで3列のグリッドにして、左端にスコアと同じ幅の「空き列」を作ります。
+         [空き 190px] [盤] [スコア 190px]
+       左右が同じ幅になるので、真ん中の列＝盤が本文の中心と一致します。
+       justify-content: center は、この3列のかたまり自体を中央に置く指定です。 */
     .board-area {
     --award-color: var(--accent);
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 190px auto 190px;
+    justify-content: center;
     align-items: center;
     gap: 28px;
+    }
+
+    /* どの列に入るかを明示する。左の1列目は誰も入らない＝空きスペースになります */
+    .board-area > .board { grid-column: 2; }
+    .board-area > .round { grid-column: 3; }
+
+    /* ★横に置けなくなったら下へ回す★
+       3列だと 190 + 28 + 220 + 28 + 190 = 656px 必要で、
+       本文の内側がこれを下回る（＝画面が約704px未満）と入りません。
+       そのときは1列に積んで、盤もスコアも中央に揃えます。 */
+    @media (max-width: 703px) {
+    .board-area {
+        grid-template-columns: auto;
+        justify-items: center;
+    }
+    .board-area > .board,
+    .board-area > .round { grid-column: 1; }
     }
 
     /* ダーツボード
@@ -223,7 +248,8 @@
     何も投げていないときは細い線が3本あるだけ */
     .round {
     display: grid; gap: 6px; justify-items: center;
-    flex: 1 1 190px;          /* 横に置けるだけの幅が無ければ、下へ折り返す */
+    /* 幅は .board-area のグリッド（3列目 190px）が決めます。
+       ここで幅を指定すると、左の空き列と釣り合わなくなって中心がずれます */
     opacity: .35; transition: opacity .5s ease;
     }
     .round.is-live,

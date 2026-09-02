@@ -8,6 +8,13 @@ import '../styles/global.css';
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width" />
 		<title>{title}</title>
+
+		<!-- ★タブに出るアイコン★
+		     これを書かないと、ブラウザは勝手に /favicon.ico を探しに行きます。
+		     Astroのテンプレートに入っていたロゴはそれで拾われていました。
+		     apple-touch-icon はiPhoneでホーム画面に追加したときのアイコンです。 -->
+		<link rel="icon" href="/images/favicon.jpg" />
+		<link rel="apple-touch-icon" href="/images/icon.jpg" />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<!-- 書体は1本にまとめる。&family= でつなげば1回のリクエストで済む。
