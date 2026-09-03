@@ -20,7 +20,7 @@
   {
     "name": "かき",
     "url": "https://my-homepage-one-murex.vercel.app/",
-    "note": "教職erガチ尊敬",
+    "note": "ピクニックみたいなサイトかわいい",
     "icon": "/images/kaki_icon.jpg"
   },
   {
@@ -40,5 +40,11 @@
     "url": "https://intro-shiwata.vercel.app/",
     "note": "サイト完成全裸待機",
     "icon": "/images/shiwata_icon.jpg"
+  },
+  {
+    "name": "あら洲過",
+    "url": "https://my-homepage-rose-nine.vercel.app/",
+    "note": "努力の姿勢ガチ見習う",
+    "icon": "/images/arasuka_icon.jpg"
   }
 ]

@@ -311,6 +311,18 @@ if (frontmatter.outro) {
     .review__body :global(pre) :global(code) { background: none; border: 0; padding: 0; }
 
     @media (max-width: 520px) {
-        .review__body :global(table) { display: block; overflow-x: auto; }
+        /* ★<table> の display は変えないこと★
+           以前は table { display: block; overflow-x: auto; } にして
+           横スクロールさせていたが、これだと <table> の外側だけが
+           普通の箱になり、中の thead/tbody/tr は「表専用の並べ方」の
+           ままという中途半端な状態になる。Safariではこの状態で
+           見出し行の高さの計算がずれ、上端が不自然に間延びする不具合があった。
+
+           原因は th の white-space: nowrap。見出しの文字を折り返さない
+           指定なので、表が本文の幅に収まりきれず、上の block+scroll の
+           力技が必要になっていた。ここで折り返しを許せば、
+           表は <table> のまま自然に本文の幅まで縮み、
+           display を一切いじらずに済む＝Safariの不具合も起きない */
+        .review__body :global(th) { white-space: normal; }
     }
 </style>
