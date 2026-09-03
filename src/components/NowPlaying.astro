@@ -1,5 +1,18 @@
 ---
-import songs from '../data/songs.json';
+import songData from '../data/songs.json';
+
+/* note と art は「書いてあれば使う」任意の項目です。
+   ? が付いた項目は「無くてもよい」という意味。
+   これを書いておかないと、songs.json のどの曲にも art が無いときに
+   TypeScriptが「そんな項目は存在しない」と怒ります。 */
+type Song = {
+	title: string;
+	artist: string;
+	note?: string;
+	art?: string;
+};
+
+const songs = songData as Song[];
 ---
 
 <!-- ★全曲ぶんを書き出して、表示するのは1つだけ★

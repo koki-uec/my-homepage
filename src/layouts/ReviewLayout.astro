@@ -1,12 +1,20 @@
 ---
 import Layout from './Layout.astro';
 import Rating from '../components/Rating.astro';
+import { createSatteriMarkdownProcessor } from '@astrojs/markdown-satteri';
 
-// Markdownファイルの「---」で囲んだ部分が、ここに frontmatter として届きます
 const { frontmatter } = Astro.props;
-
-// courses を書いていない記事でも落ちないように、無ければ空の配列にしておく
 const courses = frontmatter.courses ?? [];
+
+/* 総評は授業一覧より後ろに置きたいが、Markdown本文（<slot />）は
+   授業一覧より前に出てしまう。そこで総評だけ frontmatter に文字列で書いてもらい、
+   本文と同じ変換器に通してHTMLにする。
+   → 表・画像・.lead などのクラスも、本文とまったく同じように使える */
+let outroHtml = '';
+if (frontmatter.outro) {
+	const processor = await createSatteriMarkdownProcessor({});
+	outroHtml = (await processor.render(frontmatter.outro)).code;
+}
 ---
 
 <Layout title={`${frontmatter.title} | しーのホームページ`}>
@@ -16,26 +24,51 @@ const courses = frontmatter.courses ?? [];
     <h1>{frontmatter.title}</h1>
     {frontmatter.summary && <p class="review__summary">{frontmatter.summary}</p>}
 
-    <!-- Markdown本文（導入や全体の感想）はここに入ります -->
     <div class="review__body">
         <slot />
     </div>
 
-    <!-- 授業ごとの評価。frontmatter の courses を順に出します -->
+    <!-- 授業ごとの評価-->
     {courses.map((c) => (
         <section class="course">
-            <h2>{c.name}</h2>
-            {c.teacher && <p class="course__teacher">{c.teacher}</p>}
+            <div class="course__head">
+                <h2>{c.name}</h2>
+                {c.teacher && <p class="course__teacher">{c.teacher}</p>}
+                {c.grade && <span class="course__grade" data-grade={c.grade}>{c.grade}</span>}
+            </div>
 
             <div class="course__ratings">
                 <Rating label="楽単度" value={c.easy} />
                 <Rating label="面白さ" value={c.fun} />
-                <Rating label="ためになった" value={c.useful} />
+                <Rating label="重さ" value={c.burden} />
+
+                {c.exam && (
+                    <p class="course__meta">
+                        <span class="course__meta-label">テスト</span>
+                        <span>{c.exam}</span>
+                    </p>
+                )}
+
+                {c.attendance && (
+                    <p class="course__meta">
+                        <span class="course__meta-label">出席</span>
+                        <span>{c.attendance}</span>
+                    </p>
+                )}
             </div>
 
             {c.text && <p class="course__text">{c.text}</p>}
         </section>
     ))}
+
+    <!-- 総評。set:html は「文字列をHTMLとして出す」指定。
+         中身は自分で書いた記事なので安全 -->
+    {outroHtml && (
+        <section class="outro">
+            <h2>総評</h2>
+            <div class="review__body" set:html={outroHtml}></div>
+        </section>
+    )}
 
 </Layout>
 
@@ -54,35 +87,230 @@ const courses = frontmatter.courses ?? [];
         color: var(--muted);
     }
 
-    /* --- 授業ひとつぶん --- */
+    /* 授業ひとつぶん*/
     .course {
         border-top: 1px solid var(--line);
         padding-top: 1rem;
         margin-bottom: 1.8rem;
     }
 
+    /* 授業名と教員名を同じ行に。
+       align-items: baseline は「文字の下端で揃える」指定。
+       大きさが違う文字を横に並べるときは、center より baseline のほうが揃って見える。
+       flex-wrap があるので、狭い画面では教員名が次の行に落ちる */
+    .course__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.1rem 0.7rem;
+        margin-bottom: 0.7rem;
+    }
+
+    /* 余白は .course__head がまとめて持つので、中の2つは0にする */
     .course h2 {
         font-size: 1rem;
-        margin: 0 0 0.15rem;
+        margin: 0;
     }
 
     .course__teacher {
-        margin: 0 0 0.7rem;
-        font-size: 0.75rem;
+        margin: 0;
+        font-size: 1.10rem;
         color: var(--muted);
     }
 
+    /* 成績。margin-left: auto が「左側の余白を全部取る」＝右端に押しやる指定。
+       授業名の長さがバラバラでも、成績だけは縦に一直線に並ぶ。
+
+       色は青2段階＋灰＋赤2段階。新しい色は足さず、既存の --accent と --red を
+       --muted に混ぜて中間段階を作っている（色数を増やすと濁るため）。
+       枠線は currentColor から作るので、色の指定は1行で済む */
+    .course__grade {
+        margin-left: auto;
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+        line-height: 1.7;
+        padding: 0 7px;
+        white-space: nowrap;
+        color: var(--muted);
+        border: 1px solid var(--line);
+        border-color: color-mix(in srgb, currentColor 38%, transparent);
+    }
+
+    .course__grade[data-grade='秀'] { color: var(--accent); }
+    .course__grade[data-grade='優'] { color: color-mix(in srgb, var(--accent) 70%, var(--muted)); }
+    .course__grade[data-grade='良'] { color: var(--muted); }
+    .course__grade[data-grade='可'] { color: color-mix(in srgb, var(--red) 70%, var(--muted)); }
+    .course__grade[data-grade='不可'] { color: var(--red); }
+
     .course__ratings { display: grid; gap: 0.35rem; margin-bottom: 0.7rem; }
 
-    .course__text { margin: 0; font-size: 0.9rem; }
+    /* 総評。授業一覧の締めくくりなので、区切り線は授業より太くする */
+    .outro {
+        border-top: 2px solid var(--line);
+        padding-top: 1.2rem;
+        margin-top: 2.4rem;
+    }
 
-    /* Markdownから出てくる見出しや段落の間隔。
-       :global を付けているのは、Markdownが生成した要素には
-       このファイルのスコープ印が付かないためです */
+    .outro h2 { font-size: 1.15rem; margin: 0 0 0.8rem; }
+
+    .course__meta {
+        display: flex;
+        align-items: baseline;
+        gap: 0.7rem;
+        font-size: 0.8rem;
+        margin: 0;
+    }
+
+    .course__meta-label {
+        width: 6em;
+        flex-shrink: 0;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+    }
+
+    /* pre-line は改行だけ残す指定。 */
+    .course__text { margin: 0; font-size: 0.9rem; white-space: pre-line; }
+
+    /* Markdownから出てくる見出しや段落の間隔。*/
     .review__body :global(h2) { font-size: 1.05rem; margin: 1.8rem 0 0.5rem; }
     .review__body :global(h3) { font-size: 0.95rem; margin: 1.3rem 0 0.4rem; }
     .review__body :global(p) { margin: 0 0 1rem; font-size: 0.9rem; }
-    .review__body :global(ul) { margin: 0 0 1rem; padding-left: 1.2rem; }
-    .review__body :global(li) { list-style: disc; font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .review__body :global(ul),
+    .review__body :global(ol) { margin: 0 0 1rem; padding-left: 1.3rem; }
+    .review__body :global(li) { font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .review__body :global(ul) > :global(li) { list-style: disc; }
+    .review__body :global(ol) > :global(li) { list-style: decimal; }
     .review__body :global(a) { color: var(--accent); }
+
+    /* 文字の大きさ。記事の中にHTMLを混ぜて使う。
+
+       段落ごと変える → div ＋ 前後に空行（空行が無いと中のMarkdownが死ぬ）
+         <div class="lead">
+         （空行）ここに本文（空行）
+         </div>
+       文中の一部だけ → <span class="small">…</span>（1行でOK） */
+    .review__body :global(.big)  { font-size: 1.25rem; line-height: 1.5; }
+    .review__body :global(.lead) { font-size: 1.05rem; line-height: 1.75; }
+    .review__body :global(.small),
+    .review__body :global(small) { font-size: 0.78rem; color: var(--muted); }
+
+    /* 本文から少し切り離すまとまり。引用（>）は青線、こちらは灰線で区別 */
+    .review__body :global(.note) {
+        font-size: 0.78rem;
+        color: var(--muted);
+        border-left: 2px solid var(--line);
+        padding: 0.1rem 0 0.1rem 0.8rem;
+        margin: 0 0 1.2rem;
+    }
+
+    /* divで囲むと中身は <p> になる。<p> 自身の 0.9rem のほうが強いので、
+       inherit で親の大きさを引き継がせる */
+    .review__body :global(.big) :global(p),
+    .review__body :global(.lead) :global(p),
+    .review__body :global(.small) :global(p),
+    .review__body :global(.note) :global(p) {
+        font-size: inherit;
+        line-height: inherit;
+        color: inherit;
+        margin: 0 0 0.5rem;
+    }
+    .review__body :global(.big) :global(p:last-child),
+    .review__body :global(.lead) :global(p:last-child),
+    .review__body :global(.small) :global(p:last-child),
+    .review__body :global(.note) :global(p:last-child) { margin-bottom: 0; }
+
+    .review__body :global(.big),
+    .review__body :global(.lead) { margin: 0 0 1.2rem; }
+
+    /* 写真
+       Markdownの ![説明]*/
+    .review__body :global(img) {
+        max-width: 100%;/*←ここ大事ね*/
+        /* 高さの上限。縦長写真は幅を絞っても画面を占領するので必要。
+           1080×1396 の時間割は、これが無いと 720×930 になる */
+        max-height: 560px;
+        /* max-height で縮めた分、幅も比率どおり縮ませる */
+        width: auto;
+        height: auto;
+        display: block;
+        border: 1px solid var(--line);
+        box-sizing: border-box;
+    }
+
+    /* 細かい字を読ませたい画像だけ、本文の幅いっぱいまで許す。
+       <img src="…" class="wide" /> と書く（![]() では指定できない） */
+    .review__body :global(img.wide) { max-height: none; }
+
+    /* 逆にもっと小さくしたいとき。<img src="…" class="thumb" /> */
+    .review__body :global(img.thumb) { max-height: 200px; }
+
+    .review__body :global(figure) { margin: 0 0 1.4rem; }
+    .review__body :global(figcaption) {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-top: 0.4rem;
+    }
+
+    .review__body :global(table) {
+        /* 内容に合わせて縮ませる。
+           100%固定だと、2列しかない表まで本文の幅いっぱいに引き伸ばされて
+           セルの中が空白だらけになる。
+           max-width があるので、列が多いときは本文の幅で折り返す */
+        width: auto;
+        max-width: 100%;
+        border-collapse: collapse;
+        margin: 0 0 1.4rem;
+        /* 本文（0.9rem）と同じ大きさに揃える。
+           表だけ小さいと、数字や記号が読み取りにくい */
+        font-size: 0.9rem;
+        border-top: 1px solid var(--line);
+    }
+
+    .review__body :global(th),
+    .review__body :global(td) {
+        text-align: left;
+        vertical-align: top;
+        padding: 0.65rem 1.1rem 0.65rem 0;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .review__body :global(th) {
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: 0.78rem;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        white-space: nowrap;
+    }
+
+    /*  引用  */
+    .review__body :global(blockquote) {
+        margin: 0 0 1.2rem;
+        padding-left: 1rem;
+        border-left: 2px solid var(--accent);
+        color: var(--muted);
+    }
+    .review__body :global(blockquote) :global(p) { margin: 0; }
+
+    /*  区切り線  */
+    .review__body :global(hr) {
+        border: 0;
+        border-top: 1px solid var(--line);
+        margin: 1.8rem 0;
+    }
+
+    /*  コード  */
+    .review__body :global(code) {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 0.85em;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        padding: 0.1em 0.35em;
+    }
+    .review__body :global(pre) { overflow-x: auto; margin: 0 0 1.2rem; padding: 0.9rem 1rem; }
+    .review__body :global(pre) :global(code) { background: none; border: 0; padding: 0; }
+
+    @media (max-width: 520px) {
+        .review__body :global(table) { display: block; overflow-x: auto; }
+    }
 </style>
