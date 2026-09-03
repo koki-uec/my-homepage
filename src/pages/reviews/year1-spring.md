@@ -1,7 +1,7 @@
 ---
 layout: ../../layouts/ReviewLayout.astro
 title: 1年前期（2クラ）uec_review
-date: 2027-02-01
+date: 2026-09-03
 summary: 各授業の感想
 label: 1年前期
 thumb: /images/thumb_review1.png
