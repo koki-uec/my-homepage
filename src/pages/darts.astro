@@ -133,10 +133,16 @@ const dartsPosts = postData.posts.filter((p) => p.src === 'DARTS');
 
     /* 同じパーツのアイテムを横に並べる。
        auto-fit ではなく wrap を使っているのは、アイテムが1個しか無い
-       パーツまで幅いっぱいに間延びさせたくないため */
+       パーツまで幅いっぱいに間延びさせたくないため。
+
+       ★かたまりごと中央に置く★
+       これが無いと、1行に収まらない個数のときに最後の行だけ
+       左に貼り付いて右側が空く＝スマホで「全部左寄り」に見える原因になる。
+       ダーツ盤のスコア欄・できあがり写真と同じ直し方 */
     .gear__items {
         display: flex;
         flex-wrap: wrap;
+        justify-content: center;
         gap: 1.2rem;
     }
 
@@ -175,26 +181,40 @@ const dartsPosts = postData.posts.filter((p) => p.src === 'DARTS');
 
     /* 組み上がりの写真。複数枚あるときは横に並べて折り返す。
        ★かたまりごと中央に置く★ justify-content: center で
-       1枚のときは今までどおり中央、複数枚のときは横並びのかたまりごと中央になる */
+       1枚のときは今までどおり中央、複数枚のときは横並びのかたまりごと中央になる。
+
+       ★下端を揃える★
+       写真ごとに縦横比がバラバラ（縦長・横長混在）だと、幅を揃えても
+       高さが不揃いになりPCでガタつく。align-items: flex-end で
+       写真の下端（＝キャプションの開始位置）を揃えることで、
+       高さが違っても足並みが揃って見える */
     .gear__results {
         display: flex;
         flex-wrap: wrap;
         justify-content: center;
+        align-items: flex-end;
         gap: 1.4rem;
         margin-bottom: 2.5rem;
     }
 
     .gear__result {
-        flex: 0 1 260px;
+        flex: 0 1 auto;
         max-width: 260px;
         text-align: center;
     }
 
+    /* ★幅ではなく高さを揃える★
+       width:100%固定だと、縦長の写真は横長の写真よりずっと背が高くなる。
+       高さの上限を決めて幅は比率任せにすれば、縦長・横長が混在しても
+       写真自体の背丈がある程度揃う（MY GEARの商品写真と同じ考え方） */
     .gear__result img {
-        width: 100%;
-        height: auto;
-        border: 1px solid var(--line);
         display: block;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 220px;
+        margin: 0 auto;
+        border: 1px solid var(--line);
     }
 
     .gear__result figcaption {
