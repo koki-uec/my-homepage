@@ -1,6 +1,31 @@
 {
-  "note": "上が新しい順。1件足すには { } のかたまりをコピーして並べること。(カンマ忘れんなよ！) src は LOCAL / DARTS / MUSIC / CODEの4種類を一応用意（増やしたい場合は style.css に .src--〇〇 を足す）。",
+  "note": "上が新しい順。1件足すには { } のかたまりをコピーして並べること。(カンマ忘れんなよ！) src は LOCAL / DARTS / MUSIC / STUDY（資格・修了したもの）の4種類。STUDYはHomeのLOGにのみ出る（darts.astroはDARTSだけ抜き出して表示するため）。5種類目を増やしたいときはここに書き足すだけでよく、他に直す場所はない（タグの色はsrcの値に関係なく一律）。",
   "posts": [
+    {
+      "date": "2026-09-25",
+      "src": "DARTS",
+      "text": "PHOENIXデビュー🎯"
+    },
+    {
+      "date": "2026-09-20",
+      "src": "DARTS",
+      "text": "初HIGH OUT"
+    },
+    {
+      "date": "2026-09-16",
+      "src": "DARTS",
+      "text": "初HIGH TON・WHITE HORSE・THREE IN THE BLACK"
+    },
+    {
+      "date": "2026-09-16",
+      "src": "STUDY",
+      "text": "基本情報技術者試験合格（予定）"
+    },
+    {
+      "date": "2026-09-12",
+      "src": "DARTS",
+      "text": "ダーツライブRATING6達成（Bフラ！）"
+    },
     {
       "date": "2026-09-02",
       "src": "LOCAL",

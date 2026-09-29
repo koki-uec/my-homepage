@@ -1,79 +1,70 @@
 ---
-import Layout from '../layouts/Layout.astro'; 
+import Layout from '../layouts/Layout.astro';
 import StatCard from '../components/StatCard.astro';
 import darts from '../data/darts.json';
 import Board from '../components/Board.astro';
+import LogList from '../components/LogList.astro';
+
+import postData from '../data/posts.json';
+import gearData from '../data/gear.json';
+
+// Homeとは逆に、ダーツの記録だけをここに出す
+const dartsPosts = postData.posts.filter((p) => p.src === 'DARTS');
 ---
 
-<Layout title="About | しーのホームページ">
-    <h1>自己紹介</h1>
+<Layout title="Darts | しーのホームページ">
 
-    <div class="intro">
-        <figure class="intro__icon">
-            <img src="/images/icon.jpg" alt="プロフィール写真" class="profile-img" />
-            <figcaption>好きな曲のイメージキャラクター</figcaption>
-        </figure>
-        <p class="intro__text">しーと言います。ゲー障が<a href="/darts">ダーツ</a>にはまってダー障になりました。軽音系の部活でドラムを叩いてます。最近は基本情報技術者試験とAtCoderに向けて精進中。</p>
-    </div>
+<h1>ダーツ🎯</h1>
+<p>同クラの友達が誘ってくれて始めた結果はちゃめちゃにはまりました。まさかこんなにダーツの沼が深いとは、、</p>
 
-
-<dl class="profile">
-    <div>
-        <dt>Name</dt>
-        <dd>しー</dd>
-    </div>
-    <div>
-        <dt>Belonging</dt>
-        <dd>軽音楽部/器楽部/シンセデザイン研究部</dd>
-    </div>
-    <div>
-        <dt>Birthday</dt>
-        <dd>2007/06/20</dd>
-    </div>
-    <div>
-        <dt>Hobby</dt>
-        <dd>ダーツ/ドラム/テニス/ゲーム</dd>
-    </div>
-    <div>
-        <dt>Games</dt>
-        <dd>Overwatch/Slay the spire2/Shadowverse/太鼓の達人</dd>
-    </div>
-    <div>
-        <dt>Personality</dt>
-        <dd>INFJ/2w3/△296/sx</dd>
-    </div>
-    <div>
-        <dt>Favorites</dt>
-        <dd>宇多田ヒカル/Aliey:s/菅原圭/King Gnu</dd>
-    </div>
-</dl>
 
 <h2>MY GEAR</h2>
+<p class="lead">使っているダーツ一式</p>
 
-<p class="lead">主要なドラムスティック</p>
-<h5>PEARL 7ABC ドラムスティック オーク ブラックラッカー</h5>
-<figure class="gear__result">
-    <img src="/images/stick.jpg" alt="ドラムスティック" />
-    <figcaption>最近これケースごと失くした</figcaption>
-</figure>
+<div class="gear">
+    {gearData.groups.map((group) => (
+        <div class="gear__group">
+            <p class="gear__tag">{group.tag}</p>
+            <div class="gear__items">
+                {group.items.map((item) => (
+                    <div class="gear__item">
+                        <h3>{item.name}</h3>
+                        <img src={item.image} alt={item.name} />
+                    </div>
+                ))}
+            </div>
+        </div>
+    ))}
+</div>
 
-<h5>VIC FIRTH 5A</h5>
-<figure class="gear__result">
-    <img src="/images/stick2.jpg" alt="ドラムスティック" />
-</figure>
+<div class="gear__results">
+    {gearData.results.map((result) => (
+        <figure class="gear__result">
+            <img src={result.image} alt={result.caption} />
+            <figcaption>{result.caption}</figcaption>
+        </figure>
+    ))}
+</div>
+
+<h2>STATS</h2>
+<p>DARTSLIVE3のスタッツ</p>
+<div class="figures">
+    <StatCard label="RATING" value={darts.rating} note={darts.flight}/>
+    <StatCard label="01 GAMES" value={darts.stats01} />
+    <StatCard label="CRICKET" value={darts.cricket} />
+</div>
+
+<p class="updated">UPDATED {darts.updated}</p>
+
+<Board />
+
+<LogList posts={dartsPosts} />
 
 <div class="social-links" slot="outside">
-    <a href="https://x.com/c_chaaan" target="_blank" rel="noopener noreferrer">
-        Twitter (X)
+    <a href="https://x.com/c_d4rts" target="_blank" rel="noopener noreferrer">
+        Twitter (ダーツ垢)
     </a>
 
-    <a href="https://www.instagram.com/t.lvb2o" target="_blank" rel="noopener noreferrer">
-		Instagram
-	</a>
-
-     <a href="https://link.studyplus.jp/DWPWYwQ7" target="_blank" rel="noopener noreferrer">
-		Studyplus
-	</a>
 </div>
 
 </Layout>
@@ -115,33 +106,52 @@ import Board from '../components/Board.astro';
 
     /* --- MY GEAR ---
        旧サイトと同じ「タグ＋製品名＋写真」の形。
-       枠ではなく上の罫線1本で区切るので、サイトの他と揃います */
-    .gear {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 1.2rem;
-        margin-bottom: 1.2rem;
-    }
+       枠ではなく上の罫線1本で区切るので、サイトの他と揃います。
 
-    /* ★写真の下端を揃える仕組み★
-       製品名の行数がバラバラなので、そのままだと写真の位置もずれます。
-       カードを縦のフレックスにして、写真に margin-top: auto を掛けると
-       「余った隙間が全部 写真の上」に集まり、写真が下端に貼り付きます。
-       カード自体はグリッドが同じ高さに揃えてくれるので、結果として下端が一直線に。 */
-    .gear__item {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;   /* 中身は左揃えのまま */
+       ★パーツごとに複数追加できる形にした★
+       以前は BARREL / FLIGHT・SHAFT / TIP の3つを横に並べて、
+       それぞれ1個しか置けなかった。マイダーツが増えてきたので、
+       「パーツ（タグ）ごとに縦に区切り、その中に複数のアイテムを横に並べる」
+       形に変更。同じパーツを増やしたいときは gear.json の items に
+       1個足すだけでよい */
+    .gear { margin-bottom: 1.2rem; }
+
+    .gear__group {
         border-top: 1px solid var(--line);
         padding-top: 0.7rem;
+        margin-bottom: 1.2rem;
     }
+    .gear__group:last-child { margin-bottom: 0; }
 
     .gear__tag {
         font-family: var(--font-display);
         font-size: 0.65rem;
         letter-spacing: 0.16em;
         color: var(--accent);
-        margin: 0 0 0.3rem;
+        margin: 0 0 0.7rem;
+    }
+
+    /* 同じパーツのアイテムを横に並べる。
+       auto-fit ではなく wrap を使っているのは、アイテムが1個しか無い
+       パーツまで幅いっぱいに間延びさせたくないため */
+    .gear__items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1.2rem;
+    }
+
+    /* ★写真の下端を揃える仕組み★
+       製品名の行数がバラバラなので、そのままだと写真の位置もずれます。
+       カードを縦のフレックスにして、写真に margin-top: auto を掛けると
+       「余った隙間が全部 写真の上」に集まり、写真が下端に貼り付きます。
+       .gear__items 側が display:flex（横並び）なので、既定の
+       align-items: stretch が効いて各カードの高さが自動で揃い、
+       結果として下端も一直線になります */
+    .gear__item {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;   /* 中身は左揃えのまま */
+        flex: 0 1 180px;
     }
 
     .gear__item h3 {
@@ -163,11 +173,20 @@ import Board from '../components/Board.astro';
         margin-top: auto;      /* 余白を上に寄せて、写真を下端へ */
     }
 
-    /* 組み上がりの写真とキャプションを、ひとかたまりで中央に。
-       margin-inline: auto が「左右の余白を等分にする」＝中央寄せです */
+    /* 組み上がりの写真。複数枚あるときは横に並べて折り返す。
+       ★かたまりごと中央に置く★ justify-content: center で
+       1枚のときは今までどおり中央、複数枚のときは横並びのかたまりごと中央になる */
+    .gear__results {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1.4rem;
+        margin-bottom: 2.5rem;
+    }
+
     .gear__result {
-        max-width: 360px;
-        margin: 0 auto 2.5rem;
+        flex: 0 1 260px;
+        max-width: 260px;
         text-align: center;
     }
 

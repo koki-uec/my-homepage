@@ -1,0 +1,32 @@
+{
+  "note": "パーツごとに items を配列で持つ。同じパーツを複数追加したいときは、items の中の { } のかたまりをコピーして並べること（カンマ忘れんなよ2）。新しいパーツ自体を増やしたいときは、groups に { \"tag\": \"...\", \"items\": [...] } を1つ足す。組み上がりの写真（できあがり✨）も results に { \"image\": \"...\", \"caption\": \"...\" } を足せば複数並ぶ。",
+  "groups": [
+    {
+      "tag": "BARREL",
+      "items": [
+        { "name": "LAZY Type2 TORPEDO", "image": "/images/lazy.jpg" },
+        { "name": "LAZY Type2.5 TiTO LIMITED", "image": "/images/lazy2.jpg" }
+      ]
+    },
+    {
+      "tag": "FLIGHT / SHAFT",
+      "items": [
+        { "name": "TARGET K-FLEX シェイプ インターミディエイト", "image": "/images/flight.jpg" },
+        { "name": "TARGET K-FLEX シェイプ インターミディエイト THE NUKE", "image": "/images/new_flight.jpg" },
+        { "name": "CONDOR AXE L4zyAlone2 L Standard", "image": "/images/flight2.jpg" },
+        { "name": "CONDOR AXE Neon Nightmare L Small", "image": "/images/flight3.jpg" }
+      ]
+    },
+    {
+      "tag": "TIP",
+      "items": [
+        { "name": "Premium Lip point 染め ブラック", "image": "/images/tip.jpg" },
+        { "name": "Premium Lip point 染め イエロー", "image": "/images/tip2.jpg" }
+      ]
+    }
+  ],
+  "results": [
+    { "image": "/images/darts.jpg", "caption": "できあがり✨（初代！）" },
+    { "image": "/images/result2.jpg", "caption": "右は友人の" }
+  ]
+}
